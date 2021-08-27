@@ -1,4 +1,59 @@
 const std = @import("std");
+const ArrayList = std.ArrayList;
+const allocator = std.heap.page_allocator;
+
+const Lexer = @import("lexer/lexer.zig").Lexer;
+
+pub const Errors = enum {
+    UNKNOWN_TOKEN,
+    END_OF_FILE,
+};
+
+pub fn describe(err: Errors) []const u8 {
+    switch (err) {
+        Errors.END_OF_FILE => return "Reached end of file",
+        else => return "Unknown Error",
+    }
+}
+
+pub fn advice(err: Errors) []const u8 {
+    switch (err) {
+        Errors.END_OF_FILE => return "File might be empty",
+        else => return "Remove the unknown token",
+    }
+}
+
+pub const ErrorType = enum {
+    ERROR,
+    WARNING,
+    INFO,
+    TODO,
+};
+
+// compiler crashes log
+pub fn logErr(err: []const u8) void {
+    std.log.err("{s}", .{err});
+}
+
+// zig fmt: off
+pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
+    try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}\n", .{ BOLD, LRED, @enumToInt(error_type), LCYAN,
+        describe(error_type) });
+
+    if (location and lexer.col < 250 and lexer.length < 250) {
+        try std.io.getStdErr().writer().print("{s}{s}--> {s}:{d}:{d}\n", .{ BOLD, LGREEN, lexer.file, lexer.line, lexer.col });
+        try std.io.getStdErr().writer().print("{d} {s}┃{s} {s}\n", .{ lexer.line, LYELLOW, RESET, "line stuff" });
+        try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{ LYELLOW, (" " ** 4096)[0..lexer.col],
+            LRED, ("^" ** 4096)[0..lexer.length], LYELLOW, advice(error_type), RESET });
+    }
+}
+// zig fmt: on
+
+pub fn printLog(lexer: *Lexer) void {
+    errorLog(lexer.err, true, lexer) catch |err| {
+        logErr(@errorName(err));
+    };
+}
 
 // colors
 const RED = "\x1b[31m";
@@ -24,31 +79,3 @@ const LCYAN = "\x1b[96m";
 const LWHITE = "\x1b[97m";
 // reset colors
 const RESET = "\x1b[0m";
-
-pub const Errors = enum {
-    UNKNOWN_TOKEN,
-    pub fn describe(self: Error) []u8 {
-        switch (self) {
-            UKNOWN_TOKEN => return "Uknown Token",
-            else => return "Uknown Error",
-        }
-    }
-    pub fn advice(self: Error) []u8 {
-        switch (self) {
-            UKNOWN_TOKEN => return "Remove the unknown token",
-            else => return "Uknown Error",
-        }
-    }
-};
-
-pub fn logErr(err: []const u8) void {
-    std.log.err("{s}", .{err});
-}
-
-pub fn logWarn(warn: []const u8) void {
-    std.log.warn("{s}", .{warn});
-}
-
-pub fn logInfo(info: []const u8) void {
-    std.log.info("{s}", .{info});
-}

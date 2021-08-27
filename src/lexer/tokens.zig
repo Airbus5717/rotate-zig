@@ -7,7 +7,7 @@ pub const Pos = struct {
 pub const Token = struct {
     pos: Pos,
     tkn_type: TokenType,
-    value: [*]u8,
+    value: *[]const u8,
 };
 
 pub const TokenType = enum {
@@ -29,7 +29,6 @@ pub const TokenType = enum {
     SemiColon, // ;
     Colon, // :
     Function, // 'fn'pub const Pos = struct {
-    Div, // /
     LeftParen, // (
     RightParen, // )
     LeftCurly, // {
@@ -60,6 +59,11 @@ pub const TokenType = enum {
     As, // 'as'
     EqualEqual, // ==
     Break, // 'break'
+    Plus, // +
+    Minus, // -
+    Star, // *
+    Div, // /
+    Multiply, // *
     AddEqual, // +=
     SubEqual, // -=
     MultEqual, // *=
@@ -68,7 +72,7 @@ pub const TokenType = enum {
     Ref, // 'ref'
     Void, // 'void'
 
-    pub fn describe(self: TokenType) []u8 {
+    pub fn describe(self: TokenType) []const u8 {
         switch (self) {
             TokenType.Identifier => return "ID",
             TokenType.Equal => return "EQUAL",

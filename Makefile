@@ -1,7 +1,7 @@
-run:
+run: fmt
 	@zig build run
 
-build:
+build: fmt
 	@zig build
 
 fmt:
