@@ -4,7 +4,7 @@ const allocator = std.heap.page_allocator;
 
 const Lexer = @import("lexer/lexer.zig").Lexer;
 
-pub const Errors = enum {
+pub const Errors = error{
     UNKNOWN_TOKEN,
     END_OF_FILE,
 };
@@ -12,47 +12,37 @@ pub const Errors = enum {
 pub fn describe(err: Errors) []const u8 {
     switch (err) {
         Errors.END_OF_FILE => return "Reached end of file",
-        else => return "Unknown Error",
+        else => return "Unknown Token",
     }
 }
 
 pub fn advice(err: Errors) []const u8 {
     switch (err) {
-        Errors.END_OF_FILE => return "File might be empty",
+        Errors.END_OF_FILE => return "File is empty or not enough code for compiling",
         else => return "Remove the unknown token",
     }
 }
 
-pub const ErrorType = enum {
-    ERROR,
-    WARNING,
-    INFO,
-    TODO,
-};
-
-// compiler crashes log
-pub fn logErr(err: []const u8) void {
-    std.log.err("{s}", .{err});
-}
-
-// zig fmt: off
+// compiler crashes logbegin
 pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
-    try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}\n", .{ BOLD, LRED, @enumToInt(error_type), LCYAN,
-        describe(error_type) });
+    try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}\n", .{ BOLD, LRED, @errorToInt(error_type) - 60, LCYAN, describe(error_type) });
 
     if (location and lexer.col < 250 and lexer.length < 250) {
         try std.io.getStdErr().writer().print("{s}{s}--> {s}:{d}:{d}\n", .{ BOLD, LGREEN, lexer.file, lexer.line, lexer.col });
         try std.io.getStdErr().writer().print("{d} {s}┃{s} {s}\n", .{ lexer.line, LYELLOW, RESET, "line stuff" });
-        try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{ LYELLOW, (" " ** 4096)[0..lexer.col],
-            LRED, ("^" ** 4096)[0..lexer.length], LYELLOW, advice(error_type), RESET });
+        try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{ LYELLOW, (" " ** 4096)[0..lexer.col], LRED, ("^" ** 4096)[0..lexer.length], LYELLOW, advice(error_type), RESET });
     }
 }
 // zig fmt: on
 
-pub fn printLog(lexer: *Lexer) void {
-    errorLog(lexer.err, true, lexer) catch |err| {
+pub fn printLog(error_type: Errors, lexer: *Lexer) void {
+    errorLog(error_type, true, lexer) catch |err| {
         logErr(@errorName(err));
     };
+}
+
+pub fn logErr(err: []const u8) void {
+    std.log.err("{s}", .{err});
 }
 
 // colors

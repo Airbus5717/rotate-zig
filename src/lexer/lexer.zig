@@ -18,45 +18,39 @@ pub const Lexer = struct {
     col: usize,
     length: usize,
     file: []const u8,
-    src: []const u8,
-    err: Errors,
+    src: [:0]const u8,
 
     pub fn freeLexer(self: *Lexer) void {
         self.tkns.deinit();
+        allocator.free(self.src);
     }
 
     pub fn lex(self: *Lexer) !void {
-        while (self.index < self.src.len and self.notEof()) {
-            print("in lex loop idx: {d}\n", .{self.index});
-            const b: bool = self.single() catch |err| {
-                log.logErr(@errorName(err));
+        while (self.index < self.src.len) {
+            self.single() catch |err| {
+                // log.printLog(err, self);
+                log.printLog(err, self);
+                return;
             };
-
-            if (!b) break;
-            self.index += 1;
             self.skipWhite();
         }
     }
 
-    pub fn single(self: *Lexer) !bool {
-        if (self.src.len < 1) {
-            self.err = log.Errors.END_OF_FILE;
-            log.printLog(self);
-            return false;
+    pub fn single(self: *Lexer) !void {
+        if (self.src.len < 3) {
+            return Errors.END_OF_FILE;
         }
 
         self.skipWhite();
         const c = self.current();
         self.length = 1;
+        const save_index = self.index;
+        const save_line = self.line;
+        const save_col = self.col;
         var reached_dot = false;
         if (std.ascii.isDigit(c)) {
-            const save_col = self.col;
-            const save_line = self.line;
-            const save_index = self.index;
-            self.advance();
+            _ = self.advance();
             while (std.ascii.isDigit(self.current()) or self.current() == '.') {
-                print("in number loop idx: {d}\n", .{self.index});
-
                 if (self.current() == '.') {
                     if (reached_dot) {
                         break;
@@ -64,9 +58,8 @@ pub const Lexer = struct {
                         reached_dot = true;
                     }
                 }
-                self.advance();
+                _ = self.advance();
                 self.length += 1;
-                print("in number length: {d}\n", .{self.length});
             }
             self.col = save_col;
             self.line = save_line;
@@ -76,17 +69,17 @@ pub const Lexer = struct {
             } else {
                 self.addToken(TokenType.Integer);
             }
-            return true;
+            return;
         } else if (c == '"') {
-            return true;
+            return;
         } else if (c == '\'') {
-            return true;
+            return;
         } else switch (c) {
             '=' => {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.EqualEqual);
-                    self.advance();
+                    _ = self.advance();
                 } else {
                     self.addToken(TokenType.Equal);
                 }
@@ -97,7 +90,7 @@ pub const Lexer = struct {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.AddEqual);
-                    self.advance();
+                    _ = self.advance();
                 } else {
                     self.addToken(TokenType.Plus);
                 }
@@ -106,7 +99,7 @@ pub const Lexer = struct {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.SubEqual);
-                    self.advance();
+                    _ = self.advance();
                 } else {
                     self.addToken(TokenType.Minus);
                 }
@@ -115,7 +108,7 @@ pub const Lexer = struct {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.MultEqual);
-                    self.advance();
+                    _ = self.advance();
                 } else {
                     self.addToken(TokenType.Star);
                 }
@@ -125,10 +118,10 @@ pub const Lexer = struct {
                 if (cc == '=') {
                     self.length += 1;
                     self.addToken(TokenType.DivEqual);
-                    self.advance();
+                    _ = self.advance();
                 } else if (cc == '/') {
                     while (self.current() != '\n' and self.notEof()) {
-                        self.advance();
+                        _ = self.advance();
                     }
                 } else {
                     self.addToken(TokenType.Div);
@@ -137,19 +130,20 @@ pub const Lexer = struct {
             else => {
                 if (c == '_' or std.ascii.isAlpha(c)) {
                     try self.multiChar();
-                } else {
-                    return false;
-                }
+                } else if (self.index >= self.src.len) {
+                    return;
+                } else return Errors.UNKNOWN_TOKEN;
             },
         }
-        print("reached end idx: {d}\n", .{self.index});
-        return true;
+        return;
     }
 
     pub fn notEof(self: *Lexer) bool {
         if (self.index < self.src.len) {
             return true;
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     pub fn multiChar(self: *Lexer) !void {
@@ -161,51 +155,61 @@ pub const Lexer = struct {
         const tkn = Token{
             .pos = position,
             .tkn_type = token_type,
-            .value = &self.src[self.index..(self.length + self.index)],
+            .value = self.src[self.index..(self.length + self.index)],
         };
-        print("adding token: {s}\n", .{token_type.describe()});
         self.tkns.append(tkn) catch |err| {
             log.logErr(@errorName(err));
         };
+
+        var i: u8 = 1;
+        while (i <= self.length) : (i += 1) {
+            _ = self.advance();
+        }
     }
 
     pub fn next(self: *Lexer) void {
-        assert(self.index < self.src.len);
         self.index += 1;
     }
 
     pub fn peek(self: *Lexer) u8 {
-        assert(self.index < self.src.len);
         return self.src[self.index + 1];
     }
 
     pub fn specific(self: *Lexer, i: usize) u8 {
-        assert(self.index < self.src.len);
         return self.src[self.index + i];
     }
 
     pub fn current(self: *Lexer) u8 {
-        assert(self.index < self.src.len);
         return self.src[self.index];
     }
 
-    pub fn advance(self: *Lexer) void {
-        const c = self.src[self.index];
-        if (self.index + 1 >= self.src.len) {
-            return;
+    pub fn advance(self: *Lexer) bool {
+        if (!(self.index < self.src.len)) {
+            return false;
         }
-        self.index += 1;
+        const c = self.current();
+        self.next();
         if (c != '\n') {
             self.col += 1;
         } else {
             self.col = 1;
             self.line += 1;
         }
+        return true;
     }
 
     pub fn skipWhite(self: *Lexer) void {
-        while (std.ascii.isSpace(self.current()) and self.notEof()) {
-            self.advance();
+        var b: bool = true;
+        while (std.ascii.isSpace(self.current()) and b) {
+            b = self.advance();
+        }
+    }
+
+    pub fn outputTokens(self: *Lexer) !void {
+        for (self.tkns.items) |tkn, index| {
+            try std.io.getStdOut().writer().print("{d: ^3}: Token: {s: <10} at {s}:{d}:{d} with text: \"{s}\"\n", .{
+                index, tkn.tkn_type.describe(), self.file, tkn.pos.line, tkn.pos.col, tkn.value,
+            });
         }
     }
 };
@@ -219,7 +223,6 @@ pub fn initLexer(filename: []const u8) Lexer {
         .length = 1,
         .file = filename,
         .src = undefined,
-        .err = log.Errors.UNKNOWN_TOKEN,
     };
     return self;
 }

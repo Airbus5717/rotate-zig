@@ -7,7 +7,7 @@ pub const Pos = struct {
 pub const Token = struct {
     pos: Pos,
     tkn_type: TokenType,
-    value: *[]const u8,
+    value: []const u8,
 };
 
 pub const TokenType = enum {
