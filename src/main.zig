@@ -6,19 +6,19 @@ const file = @import("file.zig");
 const output = @import("log.zig");
 
 pub fn main() void {
-    compile() catch |err| {
-        output.logErr(@errorName(err));
-    };
+    compile();
 }
 
-pub fn compile() !void {
+pub fn compile() void {
     const filename = "main.vr";
-    var lex = lexer.initLexer(filename);
+    var lex = try lexer.initLexer(filename);
     lex.src = file.readFile(filename) catch |err| {
         output.logErr(@errorName(err));
         return;
     };
     defer lex.freeLexer();
-    try lex.lex();
-    try lex.outputTokens();
+    lex.lex() catch |err| {
+        output.logErr(@errorName(err));
+        return;
+    };
 }

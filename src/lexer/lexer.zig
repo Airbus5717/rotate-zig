@@ -13,6 +13,8 @@ const Pos = @import("tokens.zig").Pos;
 
 pub const Lexer = struct {
     tkns: ArrayList(Token),
+    lines: ArrayList(usize),
+    begin: usize,
     index: usize,
     line: usize,
     col: usize,
@@ -22,6 +24,7 @@ pub const Lexer = struct {
 
     pub fn freeLexer(self: *Lexer) void {
         self.tkns.deinit();
+        self.lines.deinit();
         allocator.free(self.src);
     }
 
@@ -34,6 +37,10 @@ pub const Lexer = struct {
             };
             self.skipWhite();
         }
+        self.outputTokens() catch |err| {
+            log.logErr(@errorName(err));
+            return;
+        };
     }
 
     pub fn single(self: *Lexer) !void {
@@ -44,6 +51,7 @@ pub const Lexer = struct {
         self.skipWhite();
         const c = self.current();
         self.length = 1;
+        self.begin = self.index;
         const save_index = self.index;
         const save_line = self.line;
         const save_col = self.col;
@@ -71,8 +79,39 @@ pub const Lexer = struct {
             }
             return;
         } else if (c == '"') {
+            _ = self.advance();
+            while (self.current() != '"') {
+                if (self.current() == 0 or self.current() == '\n') {
+                    return Errors.NOT_CLOSED_STR;
+                } else if (self.current() == '\\' and self.peek() == '"') {
+                    _ = self.advance();
+                    self.length += 1;
+                }
+                _ = self.advance();
+                self.length += 1;
+            }
+            self.length += 1;
+            self.col = save_col;
+            self.line = save_line;
+            self.index = save_index;
+            self.addToken(TokenType.String);
             return;
         } else if (c == '\'') {
+            self.length = 1;
+            _ = self.advance();
+            if (self.current() == '\\' and self.specific(2) == '\'') {
+                _ = self.advance();
+                self.length += 1;
+                _ = self.advance();
+                self.length += 1;
+            } else if (self.peek() == '\'') {
+                _ = self.advance();
+                self.length += 1;
+            } else {
+                return Errors.NOT_CLOSED_CHAR;
+            }
+            self.length += 1;
+            self.addToken(TokenType.Char);
             return;
         } else switch (c) {
             '=' => {
@@ -127,11 +166,37 @@ pub const Lexer = struct {
                     self.addToken(TokenType.Div);
                 }
             },
+            '(' => self.addToken(TokenType.LeftParen),
+            ')' => self.addToken(TokenType.RightParen),
+            '{' => self.addToken(TokenType.LeftCurly),
+            '}' => self.addToken(TokenType.RightCurly),
+            '[' => self.addToken(TokenType.LeftSQRBrackets),
+            ']' => self.addToken(TokenType.RightSQRBrackets),
+            '>' => {
+                if (self.peek() == '=') {
+                    self.length += 1;
+                    self.addToken(TokenType.GreaterEqual);
+                    _ = self.advance();
+                } else {
+                    self.addToken(TokenType.Greater);
+                }
+            },
+            '<' => {
+                if (self.peek() == '=') {
+                    self.length += 1;
+                    self.addToken(TokenType.LessEqual);
+                    _ = self.advance();
+                } else {
+                    self.addToken(TokenType.Less);
+                }
+            },
+            '.' => self.addToken(TokenType.Dot),
+            '!' => self.addToken(TokenType.Not),
             else => {
                 if (c == '_' or std.ascii.isAlpha(c)) {
                     try self.multiChar();
                 } else if (self.index >= self.src.len) {
-                    return;
+                    return Errors.END_OF_FILE;
                 } else return Errors.UNKNOWN_TOKEN;
             },
         }
@@ -194,6 +259,9 @@ pub const Lexer = struct {
         } else {
             self.col = 1;
             self.line += 1;
+            self.lines.append(self.index) catch |err| {
+                log.logErr(@errorName(err));
+            };
         }
         return true;
     }
@@ -211,13 +279,18 @@ pub const Lexer = struct {
                 index, tkn.tkn_type.describe(), self.file, tkn.pos.line, tkn.pos.col, tkn.value,
             });
         }
+        // for (self.lines.items) |line| {
+        //     print("{d}\n", .{line});
+        // }
     }
 };
 
-pub fn initLexer(filename: []const u8) Lexer {
+pub fn initLexer(filename: []const u8) !Lexer {
     var self = Lexer{
         .tkns = ArrayList(Token).init(allocator),
+        .lines = ArrayList(usize).init(allocator),
         .index = 0,
+        .begin = 0,
         .line = 1,
         .col = 1,
         .length = 1,

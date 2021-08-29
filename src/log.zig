@@ -1,24 +1,30 @@
 const std = @import("std");
 const ArrayList = std.ArrayList;
 const allocator = std.heap.page_allocator;
-
+const print = std.debug.print;
 const Lexer = @import("lexer/lexer.zig").Lexer;
 
 pub const Errors = error{
     UNKNOWN_TOKEN,
     END_OF_FILE,
+    NOT_CLOSED_STR,
+    NOT_CLOSED_CHAR,
 };
 
 pub fn describe(err: Errors) []const u8 {
     switch (err) {
         Errors.END_OF_FILE => return "Reached end of file",
+        Errors.NOT_CLOSED_STR => return "String not closed",
+        Errors.NOT_CLOSED_CHAR => return "Char not closed",
         else => return "Unknown Token",
     }
 }
 
 pub fn advice(err: Errors) []const u8 {
     switch (err) {
-        Errors.END_OF_FILE => return "File is empty or not enough code for compiling",
+        Errors.END_OF_FILE => return "Reached end of file",
+        Errors.NOT_CLOSED_STR => return "Close string with double quotes",
+        Errors.NOT_CLOSED_CHAR => return "Close char with single quote",
         else => return "Remove the unknown token",
     }
 }
@@ -26,14 +32,30 @@ pub fn advice(err: Errors) []const u8 {
 // compiler crashes logbegin
 pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
     try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}\n", .{ BOLD, LRED, @errorToInt(error_type) - 60, LCYAN, describe(error_type) });
+    var i: usize = 0;
+    while (lexer.src[lexer.index + i] != '\n') {
+        i += 1;
+    }
+    var src: []const u8 = undefined;
+    if (lexer.line == 1) {
+        src = lexer.src[0..(lexer.index + i)];
+    } else {
+        src = lexer.src[lexer.lines.items[(lexer.lines.items.len - 1)]..(lexer.index + i)];
+    }
 
-    if (location and lexer.col < 250 and lexer.length < 250) {
+    var distance: usize = undefined;
+    if ((lexer.col - lexer.length + 1) <= 0) {
+        distance = 1;
+    } else {
+        distance = lexer.col - lexer.length + 1;
+    }
+
+    if (location) {
         try std.io.getStdErr().writer().print("{s}{s}--> {s}:{d}:{d}\n", .{ BOLD, LGREEN, lexer.file, lexer.line, lexer.col });
-        try std.io.getStdErr().writer().print("{d} {s}┃{s} {s}\n", .{ lexer.line, LYELLOW, RESET, "line stuff" });
-        try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{ LYELLOW, (" " ** 4096)[0..lexer.col], LRED, ("^" ** 4096)[0..lexer.length], LYELLOW, advice(error_type), RESET });
+        try std.io.getStdErr().writer().print("{d} {s}┃{s} {s}\n", .{ lexer.line, LYELLOW, RESET, src });
+        try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{ LYELLOW, (" " ** 4096)[0..distance], LRED, ("^" ** 4096)[0..lexer.length], LYELLOW, advice(error_type), RESET });
     }
 }
-// zig fmt: on
 
 pub fn printLog(error_type: Errors, lexer: *Lexer) void {
     errorLog(error_type, true, lexer) catch |err| {

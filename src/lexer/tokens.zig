@@ -43,7 +43,9 @@ pub const TokenType = enum {
     While, // 'while'
     Arrow, // ->
     Greater, // >
+    GreaterEqual, // >=
     Less, // <
+    LessEqual, // <=
     Dot, // .
     Not, // "!"
     And, // 'and'
