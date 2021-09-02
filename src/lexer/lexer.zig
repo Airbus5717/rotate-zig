@@ -102,21 +102,24 @@ pub const Lexer = struct {
             self.length = 1;
             _ = self.advance();
             while (self.current() != '\'') {
-                if (std.ascii.isSpace(self.current()) and self.peek() != '\'') {
-                    return Errors.NOT_CLOSED_CHAR;
-                }
                 if (self.current() == 0) {
+                    self.length = 1;
                     return Errors.END_OF_FILE;
                 }
-                if (self.length > 2) {
+                if (std.ascii.isSpace(self.current()) and self.peek() != '\'') {
+                    self.length = 1;
                     return Errors.NOT_CLOSED_CHAR;
                 }
+
                 if (self.length == 2 and self.past() == '\\' and self.current() != '\\') {
                     _ = self.advance();
                     self.length += 1;
                     break;
-                }
-                if (self.length > 1 and self.past() != '\\' and (self.peek() == '\'' or self.peek() == '\\')) {
+                } else if (self.length > 1 and self.past() != '\\' and (self.peek() == '\'' or self.peek() == '\\')) {
+                    self.length = 1;
+                    return Errors.NOT_CLOSED_CHAR;
+                } else if (self.length > 1) {
+                    self.length = 1;
                     return Errors.NOT_CLOSED_CHAR;
                 }
                 _ = self.advance();

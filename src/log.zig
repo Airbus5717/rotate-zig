@@ -43,12 +43,7 @@ pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
         src = lexer.src[lexer.lines.items[(lexer.lines.items.len - 1)]..(lexer.index + i)];
     }
 
-    var distance: usize = undefined;
-    if (lexer.length == 1) {
-        distance = lexer.col;
-    } else {
-        distance = lexer.col - lexer.length;
-    }
+    const distance = lexer.col - lexer.length;
 
     if (location) {
         try std.io.getStdErr().writer().print("{s}{s}--> {s}:{d}:{d}\n", .{ BOLD, LGREEN, lexer.file, lexer.line, lexer.col });
