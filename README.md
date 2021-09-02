@@ -1,3 +1,3 @@
 # Rotate Programming Language (Zig implementation)
 
-WIP
+- will use c allocator

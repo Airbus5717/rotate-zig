@@ -1,6 +1,6 @@
 const std = @import("std");
 const ArrayList = std.ArrayList;
-const allocator = std.heap.page_allocator;
+const allocator = std.heap.c;
 const print = std.debug.print;
 const Lexer = @import("lexer/lexer.zig").Lexer;
 
@@ -31,7 +31,7 @@ pub fn advice(err: Errors) []const u8 {
 
 // compiler crashes logbegin
 pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
-    try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}\n", .{ BOLD, LRED, @errorToInt(error_type) - 60, LCYAN, describe(error_type) });
+    try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}\n", .{ BOLD, LRED, @errorToInt(error_type), LCYAN, describe(error_type) });
     var i: usize = 0;
     while (lexer.src[lexer.index + i] != '\n') {
         i += 1;
@@ -44,10 +44,10 @@ pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
     }
 
     var distance: usize = undefined;
-    if ((lexer.col - lexer.length + 1) <= 0) {
-        distance = 1;
+    if (lexer.length == 1) {
+        distance = lexer.col;
     } else {
-        distance = lexer.col - lexer.length + 1;
+        distance = lexer.col - lexer.length;
     }
 
     if (location) {

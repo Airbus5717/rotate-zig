@@ -1,5 +1,5 @@
 const std = @import("std");
-const print = std.debug.print;
+const allocator = std.heap.c_allocator;
 
 const lexer = @import("lexer/lexer.zig");
 const file = @import("file.zig");
@@ -12,11 +12,12 @@ pub fn main() void {
 pub fn compile() void {
     const filename = "main.vr";
     var lex = try lexer.initLexer(filename);
+    defer lex.freeLexer();
     lex.src = file.readFile(filename) catch |err| {
         output.logErr(@errorName(err));
         return;
     };
-    defer lex.freeLexer();
+    defer lex.freeSource();
     lex.lex() catch |err| {
         output.logErr(@errorName(err));
         return;

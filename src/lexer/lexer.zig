@@ -1,7 +1,7 @@
 const std = @import("std");
 const assert = std.debug.assert;
 const ArrayList = std.ArrayList;
-const allocator = std.heap.page_allocator;
+const allocator = std.heap.c_allocator;
 
 const print = std.debug.print;
 
@@ -20,18 +20,20 @@ pub const Lexer = struct {
     col: usize,
     length: usize,
     file: []const u8,
-    src: [:0]const u8,
+    src: []const u8,
 
     pub fn freeLexer(self: *Lexer) void {
         self.tkns.deinit();
         self.lines.deinit();
+    }
+
+    pub fn freeSource(self: *Lexer) void {
         allocator.free(self.src);
     }
 
     pub fn lex(self: *Lexer) !void {
         while (self.index < self.src.len) {
             self.single() catch |err| {
-                // log.printLog(err, self);
                 log.printLog(err, self);
                 return;
             };
@@ -44,7 +46,7 @@ pub const Lexer = struct {
     }
 
     pub fn single(self: *Lexer) !void {
-        if (self.src.len < 3) {
+        if (self.src.len < 1) {
             return Errors.END_OF_FILE;
         }
 
@@ -99,18 +101,32 @@ pub const Lexer = struct {
         } else if (c == '\'') {
             self.length = 1;
             _ = self.advance();
-            if (self.current() == '\\' and self.specific(2) == '\'') {
+            while (self.current() != '\'') {
+                if (std.ascii.isSpace(self.current()) and self.peek() != '\'') {
+                    return Errors.NOT_CLOSED_CHAR;
+                }
+                if (self.current() == 0) {
+                    return Errors.END_OF_FILE;
+                }
+                if (self.length > 2) {
+                    return Errors.NOT_CLOSED_CHAR;
+                }
+                if (self.length == 2 and self.past() == '\\' and self.current() != '\\') {
+                    _ = self.advance();
+                    self.length += 1;
+                    break;
+                }
+                if (self.length > 1 and self.past() != '\\' and (self.peek() == '\'' or self.peek() == '\\')) {
+                    return Errors.NOT_CLOSED_CHAR;
+                }
                 _ = self.advance();
                 self.length += 1;
-                _ = self.advance();
-                self.length += 1;
-            } else if (self.peek() == '\'') {
-                _ = self.advance();
-                self.length += 1;
-            } else {
-                return Errors.NOT_CLOSED_CHAR;
             }
+
             self.length += 1;
+            self.col = save_col;
+            self.line = save_line;
+            self.index = save_index;
             self.addToken(TokenType.Char);
             return;
         } else switch (c) {
@@ -194,7 +210,9 @@ pub const Lexer = struct {
             '!' => self.addToken(TokenType.Not),
             else => {
                 if (c == '_' or std.ascii.isAlpha(c)) {
-                    try self.multiChar();
+                    self.multiChar() catch |err| {
+                        return err;
+                    };
                 } else if (self.index >= self.src.len) {
                     return Errors.END_OF_FILE;
                 } else return Errors.UNKNOWN_TOKEN;
@@ -212,7 +230,17 @@ pub const Lexer = struct {
     }
 
     pub fn multiChar(self: *Lexer) !void {
-        _ = self;
+        const save_col = self.col;
+        const save_line = self.line;
+        const save_index = self.index;
+        const save_len = self.length;
+        _ = self.advance();
+        var tkn_type = TokenType.Identifier;
+        _ = tkn_type;
+        _ = save_len;
+        _ = save_index;
+        _ = save_line;
+        _ = save_col;
     }
 
     pub fn addToken(self: *Lexer, token_type: TokenType) void {
@@ -237,15 +265,27 @@ pub const Lexer = struct {
     }
 
     pub fn peek(self: *Lexer) u8 {
-        return self.src[self.index + 1];
+        if (self.notEof()) {
+            return self.src[self.index + 1];
+        } else return 0;
+    }
+
+    pub fn past(self: *Lexer) u8 {
+        if (self.notEof()) {
+            return self.src[self.index - 1];
+        } else return 0;
     }
 
     pub fn specific(self: *Lexer, i: usize) u8 {
-        return self.src[self.index + i];
+        if (self.notEof()) {
+            return self.src[self.index + i];
+        } else return 0;
     }
 
     pub fn current(self: *Lexer) u8 {
-        return self.src[self.index];
+        if (self.notEof()) {
+            return self.src[self.index];
+        } else return 0;
     }
 
     pub fn advance(self: *Lexer) bool {
