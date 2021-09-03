@@ -1,16 +1,17 @@
 const std = @import("std");
-const ArrayList = std.ArrayList;
 const allocator = std.heap.c_allocator;
 
 pub fn readFile(filename: []const u8) ![:0]const u8 {
     var dir = std.fs.cwd();
     var file = try dir.openFile(filename, .{});
-    defer file.close();
     const len = try file.getEndPos();
+    file.close();
     if (len > std.math.maxInt(usize)) {
         return error{OutOfMemory}.OutOfMemory;
     }
-    return std.cstr.addNullByte(allocator, try dir.readFileAlloc(allocator, filename, std.math.maxInt(usize)));
+    const str = try dir.readFileAlloc(allocator, filename, len);
+    defer allocator.free(str);
+    return std.cstr.addNullByte(allocator, str);
 }
 
 // var source = std.ArrayList(u8).init(allocator);

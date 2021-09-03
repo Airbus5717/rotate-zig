@@ -1,7 +1,4 @@
 const std = @import("std");
-const ArrayList = std.ArrayList;
-const allocator = std.heap.c;
-const print = std.debug.print;
 const Lexer = @import("lexer/lexer.zig").Lexer;
 
 pub const Errors = error{

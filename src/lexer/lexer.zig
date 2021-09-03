@@ -238,12 +238,16 @@ pub const Lexer = struct {
         const save_index = self.index;
         const save_len = self.length;
         _ = self.advance();
+        self.length = 1;
+        while (std.ascii.isAlNum(self.current()) or self.current() == '_') : (self.length += 1) {
+            _ = self.advance();
+        }
+        self.length = save_len;
+        self.index = save_index;
+        self.line = save_line;
+        self.col = save_col;
         var tkn_type = TokenType.Identifier;
         _ = tkn_type;
-        _ = save_len;
-        _ = save_index;
-        _ = save_line;
-        _ = save_col;
     }
 
     pub fn addToken(self: *Lexer, token_type: TokenType) void {

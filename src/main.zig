@@ -1,5 +1,4 @@
 const std = @import("std");
-const allocator = std.heap.c_allocator;
 
 const lexer = @import("lexer/lexer.zig");
 const file = @import("file.zig");
