@@ -73,6 +73,7 @@ pub const TokenType = enum {
     Struct, // 'struct'
     Ref, // 'ref'
     Void, // 'void'
+    Skip, // 'continue' alternative
 
     pub fn describe(self: TokenType) []const u8 {
         switch (self) {
@@ -80,13 +81,13 @@ pub const TokenType = enum {
             TokenType.Equal => return "EQUAL",
             TokenType.Let => return "LET",
             TokenType.Integer => return "INT",
-            TokenType.IntKeyword => return "INT_KEYWORD",
+            TokenType.IntKeyword => return "INT_KWORD",
             TokenType.Float => return "FLOAT",
-            TokenType.FloatKeyword => return "FLOAT_KEYWORD",
+            TokenType.FloatKeyword => return "FLOAT_KWORD",
             TokenType.String => return "STRING",
-            TokenType.StringKeyword => return "STR_KEYWORD",
+            TokenType.StringKeyword => return "STR_KWORD",
             TokenType.Char => return "CHAR",
-            TokenType.CharKeyword => return "CHAR_KEYWORD",
+            TokenType.CharKeyword => return "CHAR_KWORD",
             TokenType.True => return "TRUE",
             TokenType.False => return "FALSE",
             TokenType.BoolKeyword => return "BOOL",
@@ -137,6 +138,7 @@ pub const TokenType = enum {
             TokenType.Struct => return "STRUCT",
             TokenType.Ref => return "REF",
             TokenType.Void => return "VOID",
+            TokenType.Skip => return "SKIP",
             else => return "???",
         }
     }

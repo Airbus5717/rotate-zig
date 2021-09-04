@@ -235,17 +235,96 @@ pub const Lexer = struct {
         const save_line = self.line;
         const save_index = self.index;
         const save_len = self.length;
-        _ = self.advance();
         self.length = 1;
-        while (std.ascii.isAlNum(self.current()) or self.current() == '_') : (self.length += 1) {
+        _ = self.advance();
+        var length: usize = 1;
+        while (std.ascii.isAlNum(self.current()) or self.current() == '_') {
             _ = self.advance();
+            length += 1;
         }
         self.length = save_len;
         self.index = save_index;
         self.line = save_line;
         self.col = save_col;
         var tkn_type = TokenType.Identifier;
-        _ = tkn_type;
+        switch (length) {
+            2 => {
+                if (std.mem.eql(u8, "if", self.slice(length))) {
+                    tkn_type = TokenType.If;
+                } else if (std.mem.eql(u8, "fn", self.slice(length))) {
+                    tkn_type = TokenType.Function;
+                } else if (std.mem.eql(u8, "or", self.slice(length))) {
+                    tkn_type = TokenType.Or;
+                } else if (std.mem.eql(u8, "as", self.slice(length))) {
+                    tkn_type = TokenType.As;
+                }
+            },
+            3 => {
+                if (std.mem.eql(u8, "for", self.slice(length))) {
+                    tkn_type = TokenType.For;
+                } else if (std.mem.eql(u8, "let", self.slice(length))) {
+                    tkn_type = TokenType.Let;
+                } else if (std.mem.eql(u8, "pub", self.slice(length))) {
+                    tkn_type = TokenType.Public;
+                } else if (std.mem.eql(u8, "str", self.slice(length))) {
+                    tkn_type = TokenType.StringKeyword;
+                } else if (std.mem.eql(u8, "mut", self.slice(length))) {
+                    tkn_type = TokenType.Mutable;
+                } else if (std.mem.eql(u8, "int", self.slice(length))) {
+                    tkn_type = TokenType.IntKeyword;
+                } else if (std.mem.eql(u8, "ref", self.slice(length))) {
+                    tkn_type = TokenType.Ref;
+                } else if (std.mem.eql(u8, "and", self.slice(length))) {
+                    tkn_type = TokenType.And;
+                }
+            },
+            4 => {
+                if (std.mem.eql(u8, "else", self.slice(length))) {
+                    tkn_type = TokenType.Else;
+                } else if (std.mem.eql(u8, "true", self.slice(length))) {
+                    tkn_type = TokenType.True;
+                } else if (std.mem.eql(u8, "false", self.slice(length))) {
+                    tkn_type = TokenType.False;
+                } else if (std.mem.eql(u8, "char", self.slice(length))) {
+                    tkn_type = TokenType.CharKeyword;
+                } else if (std.mem.eql(u8, "bool", self.slice(length))) {
+                    tkn_type = TokenType.BoolKeyword;
+                } else if (std.mem.eql(u8, "void", self.slice(length))) {
+                    tkn_type = TokenType.Void;
+                } else if (std.mem.eql(u8, "skip", self.slice(length))) {
+                    tkn_type = TokenType.Skip;
+                }
+            },
+            5 => {
+                if (std.mem.eql(u8, "while", self.slice(length))) {
+                    tkn_type = TokenType.While;
+                } else if (std.mem.eql(u8, "false", self.slice(length))) {
+                    tkn_type = TokenType.False;
+                } else if (std.mem.eql(u8, "match", self.slice(length))) {
+                    tkn_type = TokenType.Match;
+                } else if (std.mem.eql(u8, "break", self.slice(length))) {
+                    tkn_type = TokenType.Break;
+                } else if (std.mem.eql(u8, "float", self.slice(length))) {
+                    tkn_type = TokenType.FloatKeyword;
+                }
+            },
+            6 => {
+                if (std.mem.eql(u8, "return", self.slice(length))) {
+                    tkn_type = TokenType.Return;
+                } else if (std.mem.eql(u8, "import", self.slice(length))) {
+                    tkn_type = TokenType.Import;
+                } else if (std.mem.eql(u8, "struct", self.slice(length))) {
+                    tkn_type = TokenType.Struct;
+                }
+            },
+            else => {
+                self.length = length;
+                self.addToken(TokenType.Identifier);
+                return;
+            },
+        }
+        self.length = length;
+        self.addToken(tkn_type);
     }
 
     pub fn addToken(self: *Lexer, token_type: TokenType) void {
@@ -253,7 +332,7 @@ pub const Lexer = struct {
         const tkn = Token{
             .pos = position,
             .tkn_type = token_type,
-            .value = self.src[self.index..(self.length + self.index)],
+            .value = self.slice(self.length),
         };
         self.tkns.append(tkn) catch |err| {
             log.logErr(@errorName(err));
@@ -263,6 +342,9 @@ pub const Lexer = struct {
         while (i <= self.length) : (i += 1) {
             _ = self.advance();
         }
+    }
+    pub fn slice(self: *Lexer, len: usize) []const u8 {
+        return self.src[self.index..(self.index + len)];
     }
 
     pub fn next(self: *Lexer) void {
