@@ -1,15 +1,14 @@
 const std = @import("std");
-const assert = std.debug.assert;
+const file = @import("../file.zig");
 const ArrayList = std.ArrayList;
 const allocator = std.heap.c_allocator;
 
-const print = std.debug.print;
-
 const log = @import("../log.zig");
 const Errors = log.Errors;
-const Token = @import("tokens.zig").Token;
-const TokenType = @import("tokens.zig").TokenType;
-const Pos = @import("tokens.zig").Pos;
+const token = @import("tokens.zig");
+const Token = token.Token;
+const TokenType = token.TokenType;
+const Pos = token.Pos;
 
 pub const Lexer = struct {
     tkns: ArrayList(Token),
@@ -22,17 +21,21 @@ pub const Lexer = struct {
     file: []const u8,
     src: []const u8,
 
-    pub fn freeLexer(self: *Lexer) void {
+    pub fn freeLexerArrayLists(self: *Lexer) void {
         self.tkns.deinit();
         self.lines.deinit();
     }
 
-    pub fn freeSource(self: *Lexer) void {
+    pub fn freeSourceCode(self: *Lexer) void {
         allocator.free(self.src);
     }
 
-    pub fn lex(self: *Lexer) !void {
-        while (self.index < self.src.len) {
+    pub fn lex(self: *Lexer) void {
+        if (self.src.len < 1) {
+            log.printLog(Errors.END_OF_FILE, self);
+            return;
+        }
+        while (self.current() != 0) {
             self.single() catch |err| {
                 log.printLog(err, self);
                 return;
@@ -46,10 +49,6 @@ pub const Lexer = struct {
     }
 
     pub fn single(self: *Lexer) !void {
-        if (self.src.len < 1) {
-            return Errors.END_OF_FILE;
-        }
-
         self.skipWhite();
         const c = self.current();
         self.length = 1;
@@ -99,7 +98,6 @@ pub const Lexer = struct {
             self.addToken(TokenType.String);
             return;
         } else if (c == '\'') {
-            self.length = 1;
             _ = self.advance();
             while (self.current() != '\'') {
                 if (self.current() == 0) {
@@ -225,7 +223,7 @@ pub const Lexer = struct {
     }
 
     pub fn notEof(self: *Lexer) bool {
-        if (self.index < self.src.len) {
+        if (self.current() != 0) {
             return true;
         } else {
             return false;
@@ -272,33 +270,22 @@ pub const Lexer = struct {
     }
 
     pub fn peek(self: *Lexer) u8 {
-        if (self.notEof()) {
-            return self.src[self.index + 1];
-        } else return 0;
+        return self.src[self.index + 1];
     }
 
     pub fn past(self: *Lexer) u8 {
-        if (self.notEof()) {
-            return self.src[self.index - 1];
-        } else return 0;
+        return self.src[self.index - 1];
     }
 
     pub fn specific(self: *Lexer, i: usize) u8 {
-        if (self.notEof()) {
-            return self.src[self.index + i];
-        } else return 0;
+        return self.src[self.index + i];
     }
 
     pub fn current(self: *Lexer) u8 {
-        if (self.notEof()) {
-            return self.src[self.index];
-        } else return 0;
+        return self.src[self.index];
     }
 
     pub fn advance(self: *Lexer) bool {
-        if (!(self.index < self.src.len)) {
-            return false;
-        }
         const c = self.current();
         self.next();
         if (c != '\n') {
@@ -321,8 +308,13 @@ pub const Lexer = struct {
     }
 
     pub fn outputTokens(self: *Lexer) !void {
+        const output = try std.fs.cwd().createFile(
+            "output.txt",
+            .{ .read = true },
+        );
+        defer output.close();
         for (self.tkns.items) |tkn, index| {
-            try std.io.getStdOut().writer().print("{d: ^3}: Token: {s: <10} at {s}:{d}:{d} with text: \"{s}\"\n", .{
+            try std.fmt.format(output.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} with text: \"{s}\"\n", .{
                 index, tkn.tkn_type.describe(), self.file, tkn.pos.line, tkn.pos.col, tkn.value,
             });
         }
@@ -344,5 +336,6 @@ pub fn initLexer(filename: []const u8) !Lexer {
         .file = filename,
         .src = undefined,
     };
+    self.src = try file.readFile(filename);
     return self;
 }

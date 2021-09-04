@@ -1,7 +1,6 @@
 const std = @import("std");
 
 const lexer = @import("lexer/lexer.zig");
-const file = @import("file.zig");
 const output = @import("log.zig");
 
 pub fn main() void {
@@ -10,15 +9,11 @@ pub fn main() void {
 
 pub fn compile() void {
     const filename = "main.vr";
-    var lex = try lexer.initLexer(filename);
-    defer lex.freeLexer();
-    lex.src = file.readFile(filename) catch |err| {
+    var lex = lexer.initLexer(filename) catch |err| {
         output.logErr(@errorName(err));
         return;
     };
-    defer lex.freeSource();
-    lex.lex() catch |err| {
-        output.logErr(@errorName(err));
-        return;
-    };
+    defer lex.freeLexerArrayLists();
+    defer lex.freeSourceCode();
+    lex.lex();
 }

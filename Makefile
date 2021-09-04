@@ -1,6 +1,9 @@
 run: fmt
 	@zig build run
 
+fast: fmt
+	@zig build -Drelease-fast=true run
+
 build: fmt
 	@zig build
 
@@ -12,9 +15,3 @@ fmt:
 
 clean:
 	@rm -rf ./zig-out/ ./zig-cache/
-
-delete: clean
-	@rm -rf build.zig ./src/
-
-create:
-	@zig init-exe
