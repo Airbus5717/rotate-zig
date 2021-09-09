@@ -1,1 +1,6 @@
-12.234 123 "string" 'c'
+import std.stdio;
+
+fn main() void {
+  printf("hello World\n");
+}
+

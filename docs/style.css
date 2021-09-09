@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css?family=Inconsolata|Inter&display=swap");
+
+body {
+  margin: 40px auto;
+  max-width: 900px;
+  line-height: 1.6;
+  font-size: 16px;
+  color: #123;
+  padding: 0 10px;
+  /* font-family: 'Inter', sans-serif; */
+}
+
+h1,
+h2,
+h3,
+h4,
+h6,
+li {
+  line-height: 1.2;
+  font-family: "Inter", sans-serif;
+}
+
+img {
+  width: 750px;
+  border-radius: 10px;
+}
+
+pre {
+  border: 1px solid black;
+  font-family: "Inconsolata", monospace;
+}
+
+::selection {
+  color: white;
+  background: #003cff;
+}

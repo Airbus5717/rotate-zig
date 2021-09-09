@@ -19,6 +19,7 @@ pub const Lexer = struct {
     col: usize,
     length: usize,
     file: []const u8,
+    logFile: []const u8,
     src: []const u8,
 
     pub fn freeLexerArrayLists(self: *Lexer) void {
@@ -176,7 +177,7 @@ pub const Lexer = struct {
                     self.addToken(TokenType.DivEqual);
                     _ = self.advance();
                 } else if (cc == '/') {
-                    while (self.current() != '\n' and self.notEof()) {
+                    while (self.current() != '\n') {
                         _ = self.advance();
                     }
                 } else {
@@ -247,94 +248,91 @@ pub const Lexer = struct {
         self.line = save_line;
         self.col = save_col;
         var tkn_type = TokenType.Identifier;
+        const word = self.slice(length);
         switch (length) {
             2 => {
-                if (std.mem.eql(u8, "if", self.slice(length))) {
+                if (std.mem.eql(u8, "if", word)) {
                     tkn_type = TokenType.If;
-                } else if (std.mem.eql(u8, "fn", self.slice(length))) {
+                } else if (std.mem.eql(u8, "fn", word)) {
                     tkn_type = TokenType.Function;
-                } else if (std.mem.eql(u8, "or", self.slice(length))) {
+                } else if (std.mem.eql(u8, "or", word)) {
                     tkn_type = TokenType.Or;
-                } else if (std.mem.eql(u8, "as", self.slice(length))) {
+                } else if (std.mem.eql(u8, "as", word)) {
                     tkn_type = TokenType.As;
                 }
             },
             3 => {
-                if (std.mem.eql(u8, "for", self.slice(length))) {
+                if (std.mem.eql(u8, "for", word)) {
                     tkn_type = TokenType.For;
-                } else if (std.mem.eql(u8, "let", self.slice(length))) {
+                } else if (std.mem.eql(u8, "let", word)) {
                     tkn_type = TokenType.Let;
-                } else if (std.mem.eql(u8, "pub", self.slice(length))) {
+                } else if (std.mem.eql(u8, "pub", word)) {
                     tkn_type = TokenType.Public;
-                } else if (std.mem.eql(u8, "str", self.slice(length))) {
+                } else if (std.mem.eql(u8, "str", word)) {
                     tkn_type = TokenType.StringKeyword;
-                } else if (std.mem.eql(u8, "mut", self.slice(length))) {
+                } else if (std.mem.eql(u8, "mut", word)) {
                     tkn_type = TokenType.Mutable;
-                } else if (std.mem.eql(u8, "int", self.slice(length))) {
+                } else if (std.mem.eql(u8, "int", word)) {
                     tkn_type = TokenType.IntKeyword;
-                } else if (std.mem.eql(u8, "ref", self.slice(length))) {
+                } else if (std.mem.eql(u8, "ref", word)) {
                     tkn_type = TokenType.Ref;
-                } else if (std.mem.eql(u8, "and", self.slice(length))) {
+                } else if (std.mem.eql(u8, "and", word)) {
                     tkn_type = TokenType.And;
                 }
             },
             4 => {
-                if (std.mem.eql(u8, "else", self.slice(length))) {
+                if (std.mem.eql(u8, "else", word)) {
                     tkn_type = TokenType.Else;
-                } else if (std.mem.eql(u8, "true", self.slice(length))) {
+                } else if (std.mem.eql(u8, "true", word)) {
                     tkn_type = TokenType.True;
-                } else if (std.mem.eql(u8, "false", self.slice(length))) {
-                    tkn_type = TokenType.False;
-                } else if (std.mem.eql(u8, "char", self.slice(length))) {
+                } else if (std.mem.eql(u8, "char", word)) {
                     tkn_type = TokenType.CharKeyword;
-                } else if (std.mem.eql(u8, "bool", self.slice(length))) {
+                } else if (std.mem.eql(u8, "bool", word)) {
                     tkn_type = TokenType.BoolKeyword;
-                } else if (std.mem.eql(u8, "void", self.slice(length))) {
+                } else if (std.mem.eql(u8, "void", word)) {
                     tkn_type = TokenType.Void;
-                } else if (std.mem.eql(u8, "skip", self.slice(length))) {
+                } else if (std.mem.eql(u8, "skip", word)) {
                     tkn_type = TokenType.Skip;
                 }
             },
             5 => {
-                if (std.mem.eql(u8, "while", self.slice(length))) {
+                if (std.mem.eql(u8, "while", word)) {
                     tkn_type = TokenType.While;
-                } else if (std.mem.eql(u8, "false", self.slice(length))) {
+                } else if (std.mem.eql(u8, "false", word)) {
                     tkn_type = TokenType.False;
-                } else if (std.mem.eql(u8, "match", self.slice(length))) {
+                } else if (std.mem.eql(u8, "match", word)) {
                     tkn_type = TokenType.Match;
-                } else if (std.mem.eql(u8, "break", self.slice(length))) {
+                } else if (std.mem.eql(u8, "break", word)) {
                     tkn_type = TokenType.Break;
-                } else if (std.mem.eql(u8, "float", self.slice(length))) {
+                } else if (std.mem.eql(u8, "float", word)) {
                     tkn_type = TokenType.FloatKeyword;
                 }
             },
             6 => {
-                if (std.mem.eql(u8, "return", self.slice(length))) {
+                if (std.mem.eql(u8, "return", word)) {
                     tkn_type = TokenType.Return;
-                } else if (std.mem.eql(u8, "import", self.slice(length))) {
+                } else if (std.mem.eql(u8, "import", word)) {
                     tkn_type = TokenType.Import;
-                } else if (std.mem.eql(u8, "struct", self.slice(length))) {
+                } else if (std.mem.eql(u8, "struct", word)) {
                     tkn_type = TokenType.Struct;
                 }
             },
-            else => {
-                self.length = length;
-                self.addToken(TokenType.Identifier);
-                return;
-            },
+            else => {},
         }
         self.length = length;
         self.addToken(tkn_type);
     }
 
     pub fn addToken(self: *Lexer, token_type: TokenType) void {
-        const position = Pos{ .line = self.line, .col = self.col, .index = self.index };
-        const tkn = Token{
-            .pos = position,
+        self.tkns.append(.{
+            .pos = .{
+                .line = self.line,
+                .col = self.col,
+                .index = self.index,
+            },
             .tkn_type = token_type,
             .value = self.slice(self.length),
-        };
-        self.tkns.append(tkn) catch |err| {
+        }) catch |err| {
             log.logErr(@errorName(err));
         };
 
@@ -391,7 +389,7 @@ pub const Lexer = struct {
 
     pub fn outputTokens(self: *Lexer) !void {
         const output = try std.fs.cwd().createFile(
-            "output.txt",
+            self.logFile,
             .{ .read = true },
         );
         defer output.close();
@@ -406,7 +404,7 @@ pub const Lexer = struct {
     }
 };
 
-pub fn initLexer(filename: []const u8) !Lexer {
+pub fn initLexer(filename: []const u8, logfile: []const u8) !Lexer {
     var self = Lexer{
         .tkns = ArrayList(Token).init(allocator),
         .lines = ArrayList(usize).init(allocator),
@@ -416,6 +414,7 @@ pub fn initLexer(filename: []const u8) !Lexer {
         .col = 1,
         .length = 1,
         .file = filename,
+        .logFile = logfile,
         .src = undefined,
     };
     self.src = try file.readFile(filename);

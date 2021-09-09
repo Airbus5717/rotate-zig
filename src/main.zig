@@ -2,6 +2,7 @@ const std = @import("std");
 
 const lexer = @import("lexer/lexer.zig");
 const output = @import("log.zig");
+const config = @import("config.zig");
 
 pub fn main() void {
     compile();
@@ -9,7 +10,8 @@ pub fn main() void {
 
 pub fn compile() void {
     const filename = "main.vr";
-    var lex = lexer.initLexer(filename) catch |err| {
+    const logFile = config.log_output;
+    var lex = lexer.initLexer(filename, logFile) catch |err| {
         output.logErr(@errorName(err));
         return;
     };

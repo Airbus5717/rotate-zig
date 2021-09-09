@@ -12,6 +12,7 @@ pub fn build(b: *std.build.Builder) void {
     const mode = b.standardReleaseOptions();
 
     const exe = b.addExecutable("rotate", "src/main.zig");
+    exe.single_threaded = true;
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.linkLibC();
