@@ -22,6 +22,11 @@ pub const Lexer = struct {
     logFile: []const u8,
     src: []const u8,
 
+    pub fn freeLexer(self: *Lexer) void {
+        self.freeLexerArrayLists();
+        self.freeSourceCode();
+    }
+
     pub fn freeLexerArrayLists(self: *Lexer) void {
         self.tkns.deinit();
         self.lines.deinit();
@@ -49,7 +54,7 @@ pub const Lexer = struct {
         };
     }
 
-    pub fn single(self: *Lexer) !void {
+    fn single(self: *Lexer) !void {
         self.skipWhite();
         const c = self.current();
         self.length = 1;
@@ -223,7 +228,7 @@ pub const Lexer = struct {
         return;
     }
 
-    pub fn notEof(self: *Lexer) bool {
+    fn notEof(self: *Lexer) bool {
         if (self.current() != 0) {
             return true;
         } else {
@@ -231,7 +236,7 @@ pub const Lexer = struct {
         }
     }
 
-    pub fn multiChar(self: *Lexer) !void {
+    fn multiChar(self: *Lexer) !void {
         const save_col = self.col;
         const save_line = self.line;
         const save_index = self.index;
@@ -317,13 +322,18 @@ pub const Lexer = struct {
                     tkn_type = TokenType.Struct;
                 }
             },
+            7 => {
+                if (std.mem.eql(u8, "include", word)) {
+                    tkn_type = TokenType.Include;
+                }
+            },
             else => {},
         }
         self.length = length;
         self.addToken(tkn_type);
     }
 
-    pub fn addToken(self: *Lexer, token_type: TokenType) void {
+    fn addToken(self: *Lexer, token_type: TokenType) void {
         self.tkns.append(.{
             .pos = .{
                 .line = self.line,
@@ -341,31 +351,31 @@ pub const Lexer = struct {
             _ = self.advance();
         }
     }
-    pub fn slice(self: *Lexer, len: usize) []const u8 {
+    fn slice(self: *Lexer, len: usize) []const u8 {
         return self.src[self.index..(self.index + len)];
     }
 
-    pub fn next(self: *Lexer) void {
+    fn next(self: *Lexer) void {
         self.index += 1;
     }
 
-    pub fn peek(self: *Lexer) u8 {
+    fn peek(self: *Lexer) u8 {
         return self.src[self.index + 1];
     }
 
-    pub fn past(self: *Lexer) u8 {
+    fn past(self: *Lexer) u8 {
         return self.src[self.index - 1];
     }
 
-    pub fn specific(self: *Lexer, i: usize) u8 {
+    fn specific(self: *Lexer, i: usize) u8 {
         return self.src[self.index + i];
     }
 
-    pub fn current(self: *Lexer) u8 {
+    fn current(self: *Lexer) u8 {
         return self.src[self.index];
     }
 
-    pub fn advance(self: *Lexer) bool {
+    fn advance(self: *Lexer) bool {
         const c = self.current();
         self.next();
         if (c != '\n') {
@@ -380,7 +390,7 @@ pub const Lexer = struct {
         return true;
     }
 
-    pub fn skipWhite(self: *Lexer) void {
+    fn skipWhite(self: *Lexer) void {
         var b: bool = true;
         while (std.ascii.isSpace(self.current()) and b) {
             b = self.advance();
@@ -392,12 +402,15 @@ pub const Lexer = struct {
             self.logFile,
             .{ .read = true },
         );
-        defer output.close();
+        try std.fmt.format(output.writer(), "{s} lexer init {s}\n", .{ "=" ** 10, "=" ** 10 });
         for (self.tkns.items) |tkn, index| {
             try std.fmt.format(output.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} with text: \"{s}\"\n", .{
                 index, tkn.tkn_type.describe(), self.file, tkn.pos.line, tkn.pos.col, tkn.value,
             });
         }
+        try std.fmt.format(output.writer(), "{s} lexer done {s}\n", .{ "=" ** 10, "=" ** 10 });
+        defer output.close();
+
         // for (self.lines.items) |line| {
         //     print("{d}\n", .{line});
         // }

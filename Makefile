@@ -11,4 +11,4 @@ fmt:
 	@zig fmt .
 
 clean:
-	@rm -rf ./zig-out/ ./zig-cache/
+	@rm -rf ./zig-out/ ./zig-cache/ output.txt

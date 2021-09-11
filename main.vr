@@ -1,6 +1,5 @@
-import std.stdio;
+include "stdio";
 
 fn main() void {
   printf("hello World\n");
 }
-

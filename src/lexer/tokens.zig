@@ -1,4 +1,4 @@
-pub const Pos = struct {
+pub const Pos = packed struct {
     line: usize,
     col: usize,
     index: usize,
@@ -10,7 +10,7 @@ pub const Token = struct {
     value: []const u8,
 };
 
-pub const TokenType = enum {
+pub const TokenType = enum(u8) {
     Identifier, // id
     Equal, // =
     Let, // 'let'
@@ -37,6 +37,7 @@ pub const TokenType = enum {
     RightSQRBrackets, // ]
     Return, // 'return'
     Import, // 'import'
+    Include, // 'include'
     If, // 'if'
     Else, // 'else'
     For, // 'for'
@@ -107,6 +108,7 @@ pub const TokenType = enum {
             TokenType.RightSQRBrackets => return "RIGHT_SQR_BRKS']'",
             TokenType.Return => return "RETURN",
             TokenType.Import => return "IMPORT",
+            TokenType.Include => return "INCLUDE",
             TokenType.If => return "IF",
             TokenType.Else => return "ELSE",
             TokenType.For => return "FOR",

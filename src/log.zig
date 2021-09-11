@@ -6,6 +6,9 @@ pub const Errors = error{
     END_OF_FILE,
     NOT_CLOSED_STR,
     NOT_CLOSED_CHAR,
+    EXPECTED_STR_AFTER_IMPORT,
+    EXPECTED_STR_AFTER_INCLUDE,
+    EXPECTED_SEMICOLON,
 };
 
 pub fn describe(err: Errors) []const u8 {
@@ -13,6 +16,9 @@ pub fn describe(err: Errors) []const u8 {
         Errors.END_OF_FILE => return "Reached end of file",
         Errors.NOT_CLOSED_STR => return "String not closed",
         Errors.NOT_CLOSED_CHAR => return "Char not closed",
+        Errors.EXPECTED_STR_AFTER_IMPORT => return "String expected after keyword `import`",
+        Errors.EXPECTED_STR_AFTER_INCLUDE => return "String expected after keyword `include`",
+        Errors.EXPECTED_SEMICOLON => return "Semicolon expected",
         else => return "Unknown Token",
     }
 }
@@ -22,6 +28,9 @@ pub fn advice(err: Errors) []const u8 {
         Errors.END_OF_FILE => return "Reached end of file",
         Errors.NOT_CLOSED_STR => return "Close string with double quotes",
         Errors.NOT_CLOSED_CHAR => return "Close char with single quote",
+        Errors.EXPECTED_STR_AFTER_IMPORT => return "Add a string after keyword `import`",
+        Errors.EXPECTED_STR_AFTER_INCLUDE => return "Add a string after keyword `include`",
+        Errors.EXPECTED_SEMICOLON => return "Add a semicolon",
         else => return "Remove the unknown token",
     }
 }

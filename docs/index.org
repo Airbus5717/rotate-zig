@@ -2,17 +2,30 @@
 #+OPTIONS: num:nil
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css"/>
 
-* Comments
+* Basics
+** Hello World
+#+begin_src c
+include "stdio";
+
+fn main() void {
+  printf("hello World\n");
+}
+#+end_src
+
+** Comments
 =//= for single line comments
 
-* Types
+
+
+* Language specification
+** Types
 1. int
 2. floats
 3. strings
 4. chars
 
 
-* Symbols
+** Symbols
 1. equal equal ====
 2. equal ===
 3. colon =:=
@@ -39,14 +52,14 @@
 24. not =!=
 
 -----
-* Keywords
-** 2 Chars keywords
+** Keywords
+*** 2 Chars keywords
 1. if
 2. fn
 3. or
 4. as
 
-** 3 Chars keywords
+*** 3 Chars keywords
  1. for
  2. let
  3. pub
@@ -56,7 +69,7 @@
  7. ref
  8. and
 
-** 4 Chars keywords
+*** 4 Chars keywords
 1. else
 2. true
 3. char
@@ -64,14 +77,17 @@
 5. void
 6. skip
 
-** 5 Chars keywords
+*** 5 Chars keywords
 1. while
 2. false
 3. match
 4. break
 5. float
 
-** 6 Chars keywords
+*** 6 Chars keywords
 1. return
 2. import
 3. struct
+
+*** 7 Chars keywords
+1. include
