@@ -75,6 +75,7 @@ pub const TokenType = enum(u8) {
     Ref, // 'ref'
     Void, // 'void'
     Skip, // 'continue' alternative
+    Defer, // `defer`
 
     pub fn describe(self: TokenType) []const u8 {
         switch (self) {
@@ -141,6 +142,7 @@ pub const TokenType = enum(u8) {
             TokenType.Ref => return "REF",
             TokenType.Void => return "VOID",
             TokenType.Skip => return "SKIP",
+            TokenType.Defer => return "DEFER",
             else => return "???",
         }
     }

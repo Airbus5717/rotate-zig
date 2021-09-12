@@ -10,7 +10,7 @@ const log = @import("../log.zig");
 
 const Import = struct {
     sys: bool,
-    path: Token,
+    ref_token: usize, // index of token in lexer
 };
 
 const GStatments = enum(u8) {
@@ -22,10 +22,10 @@ const GStatments = enum(u8) {
 
 const ParserPos = packed struct {
     parsed_type: GStatments,
-    index: usize,
+    idx: usize,
 };
 
-const Parser = struct {
+pub const Parser = struct {
     imports: ArrayList(Import),
     loc: ArrayList(ParserPos),
 
@@ -35,9 +35,9 @@ const Parser = struct {
             .imports = ArrayList(Import).init(allocator),
         };
     }
-
     pub fn deinit(self: *Parser) void {
         self.imports.deinit();
+        self.loc.deinit();
     }
 
     pub fn outputParser(self: *Parser) !void {
@@ -58,31 +58,37 @@ const Parser = struct {
     }
 };
 
-pub fn parseRotate(lexer: *Lexer) Parser {
-    var parse = Parser.init();
-    _ = parse.imports;
+pub fn parseRotate(parse: *Parser, lexer: *Lexer) void {
     var i: usize = 0;
     while (i < lexer.tkns.items.len) : (i += 1) {
+
         // std.debug.print("{s}: {s}\n", .{ lexer.tkns.items[i].tkn_type.describe(), lexer.tkns.items[i].value });
         switch (lexer.tkns.items[i].tkn_type) {
-            TokenType.Import => parseImports(&i, lexer, &parse, false),
-            TokenType.Include => parseImports(&i, lexer, &parse, true),
-            else => {},
+            TokenType.Import => parseImports(&i, lexer, parse, false),
+            TokenType.Include => parseImports(&i, lexer, parse, true),
+            else => {
+                std.debug.print("{s}\n", .{lexer.tkns.items[i].tkn_type});
+            },
         }
     }
-    return parse;
+    // return parse;
 }
 
 fn parseImports(i: *usize, lexer: *Lexer, parser: *Parser, sys: bool) void {
     if (lexer.tkns.items[i.* + 1].tkn_type == .String) {
+        var parsed_import = Import{
+            .ref_token = i.* + 1,
+            .sys = sys,
+        };
+        // std.debug.print("in parser: {any}\n", .{parsed_import.ref_token});
         i.* += 1;
         if (lexer.tkns.items[i.* + 1].tkn_type == .SemiColon) {
             i.* += 1;
-            parser.imports.append(Import{ .sys = sys, .path = lexer.tkns.items[i.* - 1] }) catch |err| {
+            parser.imports.append(parsed_import) catch |err| {
                 log.logErr(@errorName(err));
                 return;
             };
-            parser.loc.append(.{ .parsed_type = .Imports, .index = parser.imports.items.len - 1 }) catch |err| {
+            parser.loc.append(ParserPos{ .parsed_type = .Imports, .idx = parser.imports.items.len - 1 }) catch |err| {
                 log.logErr(@errorName(err));
                 return;
             };

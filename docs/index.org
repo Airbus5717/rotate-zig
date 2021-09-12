@@ -83,6 +83,7 @@ fn main() void {
 3. match
 4. break
 5. float
+6. defer
 
 *** 6 Chars keywords
 1. return

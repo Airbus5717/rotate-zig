@@ -311,6 +311,8 @@ pub const Lexer = struct {
                     tkn_type = TokenType.Break;
                 } else if (std.mem.eql(u8, "float", word)) {
                     tkn_type = TokenType.FloatKeyword;
+                } else if (std.mem.eql(u8, "defer", word)) {
+                    tkn_type = TokenType.Defer;
                 }
             },
             6 => {
