@@ -66,7 +66,6 @@ pub const TokenType = enum(u8) {
     Minus, // -
     Star, // *
     Div, // /
-    Multiply, // *
     AddEqual, // +=
     SubEqual, // -=
     MultEqual, // *=
@@ -143,7 +142,6 @@ pub const TokenType = enum(u8) {
             TokenType.Void => return "VOID",
             TokenType.Skip => return "SKIP",
             TokenType.Defer => return "DEFER",
-            else => return "???",
         }
     }
 };

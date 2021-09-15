@@ -6,5 +6,5 @@
 
 ## requirements
 
-- [] Zig compiler
-- [] Make
+- [x] Zig compiler
+- [x] Make

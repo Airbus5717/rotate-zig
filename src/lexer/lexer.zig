@@ -36,22 +36,16 @@ pub const Lexer = struct {
         allocator.free(self.src);
     }
 
-    pub fn lex(self: *Lexer) void {
+    pub fn lex(self: *Lexer) !void {
         if (self.src.len < 1) {
-            log.printLog(Errors.END_OF_FILE, self);
-            return;
+            return Errors.END_OF_FILE;
         }
         while (self.current() != 0) {
             self.single() catch |err| {
-                log.printLog(err, self);
-                return;
+                return err;
             };
             self.skipWhite();
         }
-        self.outputTokens() catch |err| {
-            log.logErr(@errorName(err));
-            return;
-        };
     }
 
     fn single(self: *Lexer) !void {
@@ -399,18 +393,27 @@ pub const Lexer = struct {
         }
     }
 
-    pub fn outputTokens(self: *Lexer) !void {
-        const output = try std.fs.cwd().createFile(
+    pub fn outputTokens(self: *Lexer) void {
+        const output = std.fs.cwd().createFile(
             self.logFile,
             .{ .read = true },
-        );
-        try std.fmt.format(output.writer(), "{s} lexer init {s}\n", .{ "=" ** 10, "=" ** 10 });
+        ) catch |err| {
+            log.logErr(@errorName(err));
+            return;
+        };
+        std.fmt.format(output.writer(), "{s} lexer init {s}\n", .{ "=" ** 10, "=" ** 10 }) catch |err| {
+            log.logErr(@errorName(err));
+        };
         for (self.tkns.items) |tkn, index| {
-            try std.fmt.format(output.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} with text: \"{s}\"\n", .{
+            std.fmt.format(output.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} with text: \"{s}\"\n", .{
                 index, tkn.tkn_type.describe(), self.file, tkn.pos.line, tkn.pos.col, tkn.value,
-            });
+            }) catch |err| {
+                log.logErr(@errorName(err));
+            };
         }
-        try std.fmt.format(output.writer(), "{s} lexer done {s}\n", .{ "=" ** 10, "=" ** 10 });
+        std.fmt.format(output.writer(), "{s} lexer done {s}\n", .{ "=" ** 10, "=" ** 10 }) catch |err| {
+            log.logErr(@errorName(err));
+        };
         defer output.close();
 
         // for (self.lines.items) |line| {
