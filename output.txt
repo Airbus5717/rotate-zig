@@ -1,7 +1,0 @@
-========== lexer init ==========
- 0 : Token: INCLUDE    at main.vr:1:1 with text: "include"
- 1 : Token: STRING     at main.vr:1:9 with text: ""stdio""
- 2 : Token: SEMICOLON';' at main.vr:1:16 with text: ";"
- 3 : Token: FUNCTION   at main.vr:3:1 with text: "fn"
- 4 : Token: ID         at main.vr:3:4 with text: "main"
-========== lexer done ==========
