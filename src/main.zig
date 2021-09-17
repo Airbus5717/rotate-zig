@@ -13,11 +13,21 @@ pub fn main() void {
 }
 
 pub fn compile(filename: []const u8, outputfile: []const u8) void {
-    var lex = lexer.initLexer(filename, config.log_output) catch |err| {
+    const log_file = std.fs.cwd().createFile(
+        config.log_output,
+        .{ .read = true },
+    ) catch |err| {
+        output.logErr(@errorName(err));
+        return;
+    };
+    defer log_file.close();
+
+    var lex = lexer.initLexer(filename, log_file) catch |err| {
         output.logErr(@errorName(err));
         return;
     };
     defer lex.freeLexer();
+
     lex.lex() catch |err| {
         output.printLog(err, &lex);
         return;

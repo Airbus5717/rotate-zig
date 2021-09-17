@@ -72,6 +72,12 @@ pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
     }
 }
 
+pub fn logInFile(file: std.fs.File, comptime fmt: []const u8, args: anytype) void {
+    std.fmt.format(file.writer(), fmt, args) catch |err| {
+        logErr(@errorName(err));
+    };
+}
+
 pub fn printLog(error_type: Errors, lexer: *Lexer) void {
     errorLog(error_type, true, lexer) catch |err| {
         logErr(@errorName(err));

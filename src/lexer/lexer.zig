@@ -19,7 +19,7 @@ pub const Lexer = struct {
     col: usize,
     length: usize,
     file: []const u8,
-    logFile: []const u8,
+    log_file: std.fs.File,
     src: []const u8,
 
     pub fn freeLexer(self: *Lexer) void {
@@ -394,27 +394,19 @@ pub const Lexer = struct {
     }
 
     pub fn outputTokens(self: *Lexer) void {
-        const output = std.fs.cwd().createFile(
-            self.logFile,
-            .{ .read = true },
-        ) catch |err| {
-            log.logErr(@errorName(err));
-            return;
-        };
-        std.fmt.format(output.writer(), "{s} lexer init {s}\n", .{ "=" ** 10, "=" ** 10 }) catch |err| {
+        std.fmt.format(self.log_file.writer(), "{s}\n## lexer \n```\n", .{"-" ** 10}) catch |err| {
             log.logErr(@errorName(err));
         };
         for (self.tkns.items) |tkn, index| {
-            std.fmt.format(output.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} with text: \"{s}\"\n", .{
+            std.fmt.format(self.log_file.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} : \"{s}\"  \n", .{
                 index, tkn.tkn_type.describe(), self.file, tkn.pos.line, tkn.pos.col, tkn.value,
             }) catch |err| {
                 log.logErr(@errorName(err));
             };
         }
-        std.fmt.format(output.writer(), "{s} lexer done {s}\n", .{ "=" ** 10, "=" ** 10 }) catch |err| {
+        std.fmt.format(self.log_file.writer(), "```\n{s}\n\n", .{"-" ** 10}) catch |err| {
             log.logErr(@errorName(err));
         };
-        defer output.close();
 
         // for (self.lines.items) |line| {
         //     print("{d}\n", .{line});
@@ -422,7 +414,7 @@ pub const Lexer = struct {
     }
 };
 
-pub fn initLexer(filename: []const u8, logfile: []const u8) !Lexer {
+pub fn initLexer(filename: []const u8, logfile: std.fs.File) !Lexer {
     var self = Lexer{
         .tkns = ArrayList(Token).init(allocator),
         .lines = ArrayList(usize).init(allocator),
@@ -432,9 +424,9 @@ pub fn initLexer(filename: []const u8, logfile: []const u8) !Lexer {
         .col = 1,
         .length = 1,
         .file = filename,
-        .logFile = logfile,
+        .log_file = logfile,
         .src = undefined,
     };
-    self.src = try file.readFile(filename);
+    self.src = try file.readFile(filename, logfile);
     return self;
 }
