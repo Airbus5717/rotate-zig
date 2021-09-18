@@ -16,7 +16,8 @@ h3,
 h4,
 h6,
 li,
-p {
+p,
+a {
   color: #c5c5c5;
   line-height: 1.2;
 }
@@ -27,13 +28,9 @@ h3,
 h4,
 h5,
 h6,
-li {
+li,
+a {
   font-family: "Open Sans", sans-serif;
-}
-
-h1 {
-  left: 50%;
-  top: 50%;
 }
 
 img {
@@ -42,10 +39,11 @@ img {
 }
 
 pre {
-  background-color: #181F27;
+  background-color: #181f27;
   margin: 1rem;
   padding: 1rem;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
+  counter-reset: line;
   color: white;
   font-family: "Inconsolata", monospace;
 }
