@@ -1,20 +1,13 @@
-/*
-
-  By Airbus5717 2021 (C)
-  MIT LICENSE
-
-*/
-
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap");
 
 body {
   margin: 40px auto;
-  max-width: 900px;
+  max-width: 60rem;
   line-height: 1.6;
   font-size: 1.1rem;
   background-color: #0f141b;
   padding: 0 10px;
-  font-family: 'Inter', sans-serif;
+  /* font-family: "Inter", sans-serif; */
 }
 
 h1,
@@ -49,9 +42,11 @@ img {
 }
 
 pre {
-  background-color: #fff;
-  border-radius: 5px;
-  color: black;
+  background-color: #181F27;
+  margin: 1rem;
+  padding: 1rem;
+  border-radius: .5rem;
+  color: white;
   font-family: "Inconsolata", monospace;
 }
 
