@@ -19,77 +19,67 @@ fn main() void {
 
 * Language specification
 ** Types
-1. int
-2. floats
-3. strings
-4. chars
-5. booleans
+- int
+- floats
+- strings
+- chars
+- booleans
 
 
 ** Symbols
-1. equal equal ====
-2. equal ===
-3. colon =:=
-4. semicolon =;=
-5. add equal =+==
-6. plus =+=
-7. sub equal =-==
-8. minus =-=
-9. mult equal =*==
-10. star =*=
-11. div equal =/==
-12. division =/=
-13. left parenthese =(=
-14. right parenthese =)=
-15. left curly brackets ={=
-16. right curly brackets =}=
-17. left sqr brackets =[=
-18. right sqr brackets =]=
-19. greater or equal =>==
-20. greater =>=
-21. less or equal =<==
-22. less =<=
-23. dot =.=
-24. not =!=
+- equal equal ====
+- equal ===
+- colon =:=
+- semicolon =;=
+- add equal =+==
+- plus =+=
+- sub equal =-==
+- minus =-=
+- mult equal =*==
+- star =*=
+- div equal =/==
+- division =/=
+- left parenthese =(=
+- right parenthese =)=
+- left curly brackets ={=
+- right curly brackets =}=
+- left sqr brackets =[=
+- right sqr brackets =]=
+- greater or equal =>==
+- greater =>=
+- less or equal =<==
+- less =<=
+- dot =.=
+- not =!=
 
 -----
 ** Keywords
-*** 2 Chars keywords
-1. if
-2. fn
-3. or
-4. as
 
-*** 3 Chars keywords
- 1. for
- 2. let
- 3. pub
- 4. str
- 5. mut
- 6. int
- 7. ref
- 8. and
-
-*** 4 Chars keywords
-1. else
-2. true
-3. char
-4. bool
-5. void
-6. skip
-
-*** 5 Chars keywords
-1. while
-2. false
-3. match
-4. break
-5. float
-6. defer
-
-*** 6 Chars keywords
-1. return
-2. import
-3. struct
-
-*** 7 Chars keywords
-1. include
+- if
+- fn
+- or
+- as
+- for
+- let
+- pub
+- str
+- mut
+- int
+- ref
+- and
+- else
+- true
+- char
+- bool
+- void
+- skip
+- while
+- false
+- match
+- break
+- float
+- defer
+- return
+- import
+- struct
+- include
