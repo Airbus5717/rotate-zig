@@ -34,4 +34,9 @@ pub fn compile(filename: []const u8, outputfile: []const u8) void {
     };
     lex.outputTokens();
     _ = outputfile;
+    var parsed = parser.Parser.init() catch |err| {
+        output.logErr(@errorName(err));
+        return;
+    };
+    defer parsed.deinit();
 }

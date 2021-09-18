@@ -8,18 +8,43 @@ const Lexer = @import("../lexer/lexer.zig").Lexer;
 const config = @import("../config.zig");
 const log = @import("../log.zig");
 
+const Node = union {
+    tkn: Token,
+};
+
 const BinaryExpr = struct {
     left: Token,
     op: Token,
     right: Token,
+    result: Token,
 };
 
-const GroupExpr = struct {};
-const LiteralExpr = struct {};
+const Stmts = struct {};
 
-pub fn parse(lexer: *Lexer) !void {
-    for (lexer.tkns.items) |item, index| {
-        _ = item;
-        _ = index;
+pub const Parser = struct {
+    stmts: ArrayList(Stmts),
+
+    pub fn init() !Parser {
+        return Parser{
+            .stmts = ArrayList(Stmts).init(allocator),
+        };
     }
-}
+
+    pub fn deinit(self: *Parser) void {
+        self.stmts.deinit();
+    }
+
+    pub fn parse(self: *Parser, lexer: *Lexer) !void {
+        _ = self;
+        for (lexer.tkns.items) |item, index| {
+            _ = index;
+            switch (item.tkn_type) {
+                .Import => {},
+                .Include => {},
+                .Let => {},
+                .Function => {},
+                else => {},
+            }
+        }
+    }
+};

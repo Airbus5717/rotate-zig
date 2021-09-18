@@ -1,13 +1,20 @@
-@import url("https://fonts.googleapis.com/css?family=Inconsolata|Inter&display=swap");
+/*
+
+  By Airbus5717 2021 (C)
+  MIT LICENSE
+
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap");
 
 body {
   margin: 40px auto;
   max-width: 900px;
   line-height: 1.6;
-  font-size: 16px;
-  color: #123;
+  font-size: 1.1rem;
+  background-color: #0f141b;
   padding: 0 10px;
-  /* font-family: 'Inter', sans-serif; */
+  font-family: 'Inter', sans-serif;
 }
 
 h1,
@@ -15,9 +22,25 @@ h2,
 h3,
 h4,
 h6,
-li {
+li,
+p {
+  color: #c5c5c5;
   line-height: 1.2;
-  font-family: "Inter", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li {
+  font-family: "Open Sans", sans-serif;
+}
+
+h1 {
+  left: 50%;
+  top: 50%;
 }
 
 img {
@@ -26,11 +49,13 @@ img {
 }
 
 pre {
-  border: 1px solid black;
+  background-color: #fff;
+  border-radius: 5px;
+  color: black;
   font-family: "Inconsolata", monospace;
 }
 
 ::selection {
   color: white;
-  background: #003cff;
+  background: #e79e67;
 }

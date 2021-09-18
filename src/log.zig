@@ -61,7 +61,7 @@ pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
     } else {
         src = lexer.src[lexer.lines.items[(lexer.lines.items.len - 1)]..(lexer.index + i)];
     }
-    std.debug.print("{s}\n", .{src});
+    // std.debug.print("{s}\n", .{src});
 
     // const distance = try std.math.sub(usize, lexer.col, lexer.length);
     // std.debug.print("{d}\n", .{distance});

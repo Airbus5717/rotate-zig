@@ -1,5 +1,5 @@
-#+TITLE: Rotate Language
-#+OPTIONS: num:nil
+#+TITLE: Rotate Programming Language
+#+OPTIONS: num:nil html-style:nil
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css"/>
 
 * Basics
@@ -23,6 +23,7 @@ fn main() void {
 2. floats
 3. strings
 4. chars
+5. booleans
 
 
 ** Symbols
