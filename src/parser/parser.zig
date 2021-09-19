@@ -7,19 +7,7 @@ const TokenType = @import("../lexer/tokens.zig").TokenType;
 const Lexer = @import("../lexer/lexer.zig").Lexer;
 const config = @import("../config.zig");
 const log = @import("../log.zig");
-
-const Node = union {
-    tkn: Token,
-};
-
-const BinaryExpr = struct {
-    left: Token,
-    op: Token,
-    right: Token,
-    result: Token,
-};
-
-const Stmts = struct {};
+const Stmts = @import("./statements.zig").Stmts;
 
 pub const Parser = struct {
     stmts: ArrayList(Stmts),

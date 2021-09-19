@@ -48,18 +48,18 @@ pub fn advice(err: Errors) []const u8 {
 
 // compiler crashes logbegin
 pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
-    std.debug.print("col: {d}, line: {d}\n{c}\n", .{ lexer.col, lexer.length, lexer.src[lexer.index] });
+    std.debug.print("col: {d}, line: {d}\n{c}\n", .{ lexer.col, lexer.length, lexer.file.code[lexer.index] });
     try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}\n", .{ BOLD, LRED, @errorToInt(error_type), LCYAN, describe(error_type) });
     var i: usize = 0;
-    while (lexer.src[lexer.index + i] != '\n') {
+    while (lexer.file.code[lexer.index + i] != '\n') {
         i += 1;
     }
     // std.debug.print("{d}\n", .{i});
     var src: []const u8 = undefined;
     if (lexer.line == 1) {
-        src = lexer.src[0..(lexer.index + i)];
+        src = lexer.file.code[0..(lexer.index + i)];
     } else {
-        src = lexer.src[lexer.lines.items[(lexer.lines.items.len - 1)]..(lexer.index + i)];
+        src = lexer.file.code[lexer.lines.items[(lexer.lines.items.len - 1)]..(lexer.index + i)];
     }
     // std.debug.print("{s}\n", .{src});
 

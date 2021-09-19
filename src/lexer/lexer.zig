@@ -1,9 +1,9 @@
 const std = @import("std");
-const file = @import("../file.zig");
 const ArrayList = std.ArrayList;
 const allocator = std.heap.c_allocator;
 
 const log = @import("../log.zig");
+const file = @import("../file.zig");
 const Errors = log.Errors;
 const token = @import("tokens.zig");
 const Token = token.Token;
@@ -18,9 +18,8 @@ pub const Lexer = struct {
     line: usize,
     col: usize,
     length: usize,
-    file: []const u8,
+    file: file.SrcFile,
     log_file: std.fs.File,
-    src: []const u8,
 
     pub fn freeLexer(self: *Lexer) void {
         self.freeLexerArrayLists();
@@ -33,17 +32,15 @@ pub const Lexer = struct {
     }
 
     pub fn freeSourceCode(self: *Lexer) void {
-        allocator.free(self.src);
+        allocator.free(self.file.code);
     }
 
     pub fn lex(self: *Lexer) !void {
-        if (self.src.len < 1) {
+        if (self.file.len < 1) {
             return Errors.END_OF_FILE;
         }
-        while (self.current() != 0) {
-            self.single() catch |err| {
-                return err;
-            };
+        while (self.index < self.file.len) {
+            try self.single();
             self.skipWhite();
         }
     }
@@ -214,7 +211,7 @@ pub const Lexer = struct {
                     self.multiChar() catch |err| {
                         return err;
                     };
-                } else if (self.index >= self.src.len) {
+                } else if (self.index >= self.file.len) {
                     return Errors.END_OF_FILE;
                 } else return Errors.UNKNOWN_TOKEN;
             },
@@ -348,7 +345,7 @@ pub const Lexer = struct {
         }
     }
     fn slice(self: *Lexer, len: usize) []const u8 {
-        return self.src[self.index..(self.index + len)];
+        return self.file.code[self.index..(self.index + len)];
     }
 
     fn next(self: *Lexer) void {
@@ -356,19 +353,19 @@ pub const Lexer = struct {
     }
 
     fn peek(self: *Lexer) u8 {
-        return self.src[self.index + 1];
+        return self.file.code[self.index + 1];
     }
 
     fn past(self: *Lexer) u8 {
-        return self.src[self.index - 1];
+        return self.file.code[self.index - 1];
     }
 
     fn specific(self: *Lexer, i: usize) u8 {
-        return self.src[self.index + i];
+        return self.file.code[self.index + i];
     }
 
     fn current(self: *Lexer) u8 {
-        return self.src[self.index];
+        return self.file.code[self.index];
     }
 
     fn advance(self: *Lexer) bool {
@@ -398,8 +395,8 @@ pub const Lexer = struct {
             log.logErr(@errorName(err));
         };
         for (self.tkns.items) |tkn, index| {
-            std.fmt.format(self.log_file.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} : \"{s}\"  \n", .{
-                index, tkn.tkn_type.describe(), self.file, tkn.pos.line, tkn.pos.col, tkn.value,
+            std.fmt.format(self.log_file.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} : \"{s}\"\n", .{
+                index, tkn.tkn_type.describe(), self.file.name, tkn.pos.line, tkn.pos.col, tkn.value,
             }) catch |err| {
                 log.logErr(@errorName(err));
             };
@@ -423,10 +420,9 @@ pub fn initLexer(filename: []const u8, logfile: std.fs.File) !Lexer {
         .line = 1,
         .col = 1,
         .length = 1,
-        .file = filename,
+        .file = undefined,
         .log_file = logfile,
-        .src = undefined,
     };
-    self.src = try file.readFile(filename, logfile);
+    self.file = (try file.readFile(filename, logfile));
     return self;
 }

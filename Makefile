@@ -15,7 +15,7 @@ fmt:
 	@zig fmt .
 
 clean:
-	@rm -rf ./zig-out/ ./zig-cache/ output.txt callgrind.out*
+	@rm -rf ./zig-out/ ./zig-cache/ output.md callgrind.out*
 
 analyze:
 	@valgrind --tool=callgrind $(BIN) 

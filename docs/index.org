@@ -4,8 +4,8 @@
 
 * Basics
 ** Hello World
-#+begin_src c
-include "stdio";
+#+begin_src cpp
+import "std";
 
 fn main() void {
   printf("hello World\n");
