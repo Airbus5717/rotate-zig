@@ -1,5 +1,8 @@
 BIN ?= ./zig-out/bin/rotate
 
+run:
+	@zig build run
+
 fast: fmt
 	@zig build -Drelease-fast=true run
 
@@ -16,5 +19,5 @@ clean:
 	@rm -rf ./zig-out/ ./zig-cache/ output.md callgrind.out*
 
 analyze:
-	@valgrind --tool=callgrind $(BIN) 
+	@valgrind --tool=callgrind $(BIN)
 	@kcachegrind
