@@ -368,7 +368,7 @@ pub const Lexer = struct {
         return self.file.code[self.index - 1];
     }
 
-    fn specific(self: *Lexer, i: usize) u8 {
+    fn specific(self: *Lexer, i: isize) u8 {
         return self.file.code[self.index + i];
     }
 

@@ -75,9 +75,8 @@ pub fn init() !Parser {
 pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
     var i: usize = 0;
     self.done = true;
-    var item: Token = lexer.tkns.items[i];
     while (i < lexer.tkns.items.len) : (i += 1) {
-        item = lexer.tkns.items[i];
+        var item = lexer.tkns.items[i];
         lexer.col = item.pos.col;
         lexer.line = item.pos.line;
         lexer.index = item.pos.index;

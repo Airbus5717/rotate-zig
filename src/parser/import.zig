@@ -8,7 +8,7 @@ const parse = @import("./parser.zig");
 
 pub const ImportStmt = struct {
     include: bool,
-    value: Token,
+    value: *Token,
 };
 
 pub fn parseImports(parser: *parse.Parser, lexer: *Lexer, index: *usize, system: bool) log.Errors!usize {
@@ -34,7 +34,7 @@ pub fn parseImports(parser: *parse.Parser, lexer: *Lexer, index: *usize, system:
         return log.Errors.EXP_SEMICOLON;
     }
     if (lexer.tkns.items[index.*].tkn_type == .SemiColon) {
-        parser.gstmts.append(parse.GStmts{ .IMPORT = ImportStmt{ .include = system, .value = lexer.tkns.items[index.* - 1] } }) catch |err| {
+        parser.gstmts.append(parse.GStmts{ .IMPORT = ImportStmt{ .include = system, .value = &lexer.tkns.items[index.* - 1] } }) catch |err| {
             log.logErr(@errorName(err));
         };
         return (index.*);

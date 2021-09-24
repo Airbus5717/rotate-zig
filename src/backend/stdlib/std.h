@@ -3,6 +3,7 @@
 
 #include <ctype.h>
 #include <limits.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -11,7 +12,7 @@
 
 /*
     ROTATE STD LIBRARY
-    ! includes stdio, ctype, limits, stdbool, stdint, stdlib and string header files
+    ! includes stdio, ctype, limits, stdbool, stdint, stdlib, stdarg and string header files
     section[0]: stdio
     section[1]: string
     section[2]: math
