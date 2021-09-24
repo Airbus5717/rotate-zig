@@ -1,5 +1,1 @@
 import "std";
-
-fn main() void {
-  printf("hello World\n");
-}

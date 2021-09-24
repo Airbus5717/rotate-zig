@@ -1,9 +1,13 @@
 const std = @import("std");
+const expect = @import("std").testing.expect;
+
 const Lexer = @import("lexer/lexer.zig").Lexer;
-const Parser = @import("parser/parser.zig").Parser;
+const parser = @import("parser/parser.zig");
+const Parser = parser.Parser;
 
 pub const Errors = error{
     UNKNOWN_TOKEN,
+    UNIMPLEMENTED,
     END_OF_FILE,
     NOT_CLOSED_STR,
     NOT_CLOSED_CHAR,
@@ -16,11 +20,36 @@ pub const Errors = error{
     NOT_ALLOWED_AT_GLOBAL,
     NO_MUT_GL_VARS,
     REQUIRE_VALUE,
+    EXIT_FAILURE,
 };
+
+pub fn isCustomError(err: Errors) bool {
+    switch (err) {
+        Errors.UNKNOWN_TOKEN,
+        Errors.UNIMPLEMENTED,
+        Errors.END_OF_FILE,
+        Errors.NOT_CLOSED_STR,
+        Errors.NOT_CLOSED_CHAR,
+        Errors.EXP_STR_AFTER_IMPORT,
+        Errors.EXP_STR_AFTER_INCLUDE,
+        Errors.EXP_SEMICOLON,
+        Errors.EXP_ID_AFTER_LET,
+        Errors.EXP_EQUAL_AFTER_ID,
+        Errors.EXP_VALUE_AFTER_EQL,
+        Errors.NOT_ALLOWED_AT_GLOBAL,
+        Errors.NO_MUT_GL_VARS,
+        Errors.REQUIRE_VALUE,
+        Errors.EXIT_FAILURE,
+        => return true,
+        else => return false,
+    }
+    return false;
+}
 
 pub fn describe(err: Errors) []const u8 {
     switch (err) {
         Errors.END_OF_FILE => return "Reached end of file",
+        Errors.UNIMPLEMENTED => return "TODO: Error string",
         Errors.NOT_CLOSED_STR => return "String not closed",
         Errors.NOT_CLOSED_CHAR => return "Char not closed",
         Errors.EXP_STR_AFTER_IMPORT => return "String expected after keyword `import`",
@@ -28,6 +57,7 @@ pub fn describe(err: Errors) []const u8 {
         Errors.EXP_SEMICOLON => return "Semicolon expected",
         Errors.EXP_ID_AFTER_LET => return "Identifier expected after keyword `let`",
         Errors.NOT_ALLOWED_AT_GLOBAL => return "Found global token at its forbidden scope",
+
         else => return "Unknown Token",
     }
 }
@@ -35,6 +65,7 @@ pub fn describe(err: Errors) []const u8 {
 pub fn advice(err: Errors) []const u8 {
     switch (err) {
         Errors.END_OF_FILE => return "Reached end of file",
+        Errors.UNIMPLEMENTED => return "Error string unimplemented",
         Errors.NOT_CLOSED_STR => return "Close string with double quotes",
         Errors.NOT_CLOSED_CHAR => return "Close char with single quote",
         Errors.EXP_STR_AFTER_IMPORT => return "Add a string after keyword `import`",
@@ -47,28 +78,27 @@ pub fn advice(err: Errors) []const u8 {
 }
 
 // compiler crashes logbegin
-pub fn errorLog(error_type: Errors, location: bool, lexer: *Lexer) !void {
-    std.debug.print("col: {d}, line: {d}\n{c}\n", .{ lexer.col, lexer.length, lexer.file.code[lexer.index] });
-    try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}\n", .{ BOLD, LRED, @errorToInt(error_type), LCYAN, describe(error_type) });
-    var i: usize = 0;
-    while (lexer.file.code[lexer.index + i] != '\n') {
-        i += 1;
-    }
-    // std.debug.print("{d}\n", .{i});
-    var src: []const u8 = undefined;
-    if (lexer.line == 1) {
-        src = lexer.file.code[0..(lexer.index + i)];
-    } else {
-        src = lexer.file.code[lexer.lines.items[(lexer.lines.items.len - 1)]..(lexer.index + i)];
-    }
-    // std.debug.print("{s}\n", .{src});
+pub fn errorLog(error_describe: []const u8, error_advice: []const u8, err_num: usize, location: bool, lexer: *Lexer) !void {
+    // std.debug.print("col: {d}, line: {d}\n{c}\n", .{ lexer.col, lexer.length, lexer.file.code[lexer.index] });
+    try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}{s}\n", .{ BOLD, LRED, err_num, LCYAN, error_describe, RESET });
 
-    // const distance = try std.math.sub(usize, lexer.col, lexer.length);
-    // std.debug.print("{d}\n", .{distance});
     if (location) {
-        try std.io.getStdErr().writer().print("{s}{s}--> {s}:{d}:{d}\n", .{ BOLD, LGREEN, lexer.file, lexer.line, lexer.col });
+        var i: usize = 0;
+        while (lexer.file.code[lexer.index + i] != '\n') {
+            i += 1;
+        }
+        var src: []const u8 = undefined;
+        if (lexer.line == 1) {
+            src = lexer.file.code[0..(lexer.index + i)];
+        } else {
+            src = lexer.file.code[lexer.lines.items[(lexer.lines.items.len - 1)]..(lexer.index + i)];
+        }
+        // std.debug.print("{s}\n", .{src});
+        // const distance = try std.math.sub(usize, lexer.col, lexer.length);
+        // std.debug.print("{d}\n", .{distance});
+        try std.io.getStdErr().writer().print("{s}{s}--> {s}:{d}:{d}\n", .{ BOLD, LGREEN, lexer.file.name, lexer.line, lexer.col });
         try std.io.getStdErr().writer().print("{d} {s}┃{s} {s}\n", .{ lexer.line, LYELLOW, RESET, src });
-        try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{ LYELLOW, (" " ** 2048)[0..lexer.col], LRED, ("^" ** 2048)[0..lexer.length], LYELLOW, advice(error_type), RESET });
+        try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{ LYELLOW, (" " ** 2048)[0..lexer.col], LRED, ("^" ** 2048)[0..lexer.length], LYELLOW, error_advice, RESET });
     }
 }
 
@@ -79,7 +109,7 @@ pub fn logInFile(file: std.fs.File, comptime fmt: []const u8, args: anytype) voi
 }
 
 pub fn printLog(error_type: Errors, lexer: *Lexer) void {
-    errorLog(error_type, true, lexer) catch |err| {
+    errorLog(describe(error_type), advice(error_type), @errorToInt(error_type), true, lexer) catch |err| {
         logErr(@errorName(err));
     };
 }
@@ -112,3 +142,8 @@ const LCYAN = "\x1b[96m";
 const LWHITE = "\x1b[97m";
 // reset colors
 const RESET = "\x1b[0m";
+
+test "Error enum" {
+    std.debug.print("{d}", .{@errorToInt(Errors.UNKNOWN_TOKEN)});
+    try expect(@errorToInt(Errors.UNKNOWN_TOKEN) == 60);
+}

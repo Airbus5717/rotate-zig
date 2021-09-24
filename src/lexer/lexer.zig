@@ -20,6 +20,7 @@ pub const Lexer = struct {
     length: usize,
     file: file.SrcFile,
     log_file: std.fs.File,
+    done: bool = false,
 
     pub fn freeLexer(self: *Lexer) void {
         self.freeLexerArrayLists();
@@ -43,6 +44,7 @@ pub const Lexer = struct {
             try self.single();
             self.skipWhite();
         }
+        self.done = true;
     }
 
     fn single(self: *Lexer) !void {

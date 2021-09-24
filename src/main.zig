@@ -34,9 +34,14 @@ pub fn compile(filename: []const u8, outputfile: []const u8) void {
     };
     lex.outputTokens();
     _ = outputfile;
-    var parsed = parser.Parser.init() catch |err| {
+    if (!lex.done) return;
+    var parsed = parser.init() catch |err| {
         output.logErr(@errorName(err));
         return;
     };
     defer parsed.deinit();
+    parsed.parse(&lex) catch |err| {
+        output.logInFile(log_file, "{s}", .{@errorName(err)});
+        return;
+    };
 }
