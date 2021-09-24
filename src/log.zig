@@ -80,7 +80,7 @@ pub fn advice(err: Errors) []const u8 {
         Errors.EXP_EQUAL_AFTER_ID => return "Add an equal symbol `=` after identifier",
         Errors.EXP_VALUE_AFTER_EQL => return "Add a value to variable",
         Errors.NO_MUT_GL_VARS => return "Remove the mutable `mut` keyword",
-        Errors.NOT_ALLOWED_AT_GLOBAL => return "Remove this token",
+        Errors.NOT_ALLOWED_AT_GLOBAL => return "Remove this bruh",
 
         else => return "Error message unimplemented",
     }

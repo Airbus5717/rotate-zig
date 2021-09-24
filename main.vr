@@ -1,1 +1,2 @@
-import "stdio"
+import "stdio";
+let x = 12;
