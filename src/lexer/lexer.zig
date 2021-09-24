@@ -49,7 +49,7 @@ pub const Lexer = struct {
 
     fn single(self: *Lexer) !void {
         self.skipWhite();
-        const c = self.current();
+        const c = try self.current();
         self.length = 1;
         self.begin = self.index;
         const save_index = self.index;
@@ -57,16 +57,17 @@ pub const Lexer = struct {
         const save_col = self.col;
         var reached_dot = false;
         if (std.ascii.isDigit(c)) {
-            _ = self.advance();
-            while (std.ascii.isDigit(self.current()) or self.current() == '.') {
-                if (self.current() == '.') {
+            if (!self.advance()) return;
+            while (std.ascii.isDigit(try self.current()) or try self.current() == '.') {
+                if ((try self.current()) == '.') {
                     if (reached_dot) {
                         break;
                     } else {
                         reached_dot = true;
                     }
                 }
-                _ = self.advance();
+                if (!self.advance()) return;
+
                 self.length += 1;
             }
             self.col = save_col;
@@ -79,15 +80,15 @@ pub const Lexer = struct {
             }
             return;
         } else if (c == '"') {
-            _ = self.advance();
-            while (self.current() != '"') {
-                if (self.current() == 0 or self.current() == '\n') {
+            if (!self.advance()) return;
+            while ((try self.current()) != '"') {
+                if ((try self.current()) == 0 or (try self.current()) == '\n') {
                     return Errors.NOT_CLOSED_STR;
-                } else if (self.current() == '\\' and self.peek() == '"') {
+                } else if ((try self.current()) == '\\' and self.peek() == '"') {
                     _ = self.advance();
                     self.length += 1;
                 }
-                _ = self.advance();
+                if (!self.advance()) return;
                 self.length += 1;
             }
             self.length += 1;
@@ -97,19 +98,21 @@ pub const Lexer = struct {
             self.addToken(TokenType.String);
             return;
         } else if (c == '\'') {
-            _ = self.advance();
-            while (self.current() != '\'') {
-                if (self.current() == 0) {
+            if (!self.advance()) return;
+
+            while ((try self.current()) != '\'') {
+                if ((try self.current()) == 0) {
                     self.length = 1;
                     return Errors.END_OF_FILE;
                 }
-                if (std.ascii.isSpace(self.current()) and self.peek() != '\'') {
+                if (std.ascii.isSpace((try self.current())) and self.peek() != '\'') {
                     self.length = 1;
                     return Errors.NOT_CLOSED_CHAR;
                 }
 
-                if (self.length == 2 and self.past() == '\\' and self.current() != '\\') {
-                    _ = self.advance();
+                if (self.length == 2 and self.past() == '\\' and (try self.current()) != '\\') {
+                    if (!self.advance()) return;
+
                     self.length += 1;
                     break;
                 } else if (self.length > 1 and self.past() != '\\' and (self.peek() == '\'' or self.peek() == '\\')) {
@@ -119,7 +122,8 @@ pub const Lexer = struct {
                     self.length = 1;
                     return Errors.NOT_CLOSED_CHAR;
                 }
-                _ = self.advance();
+                if (!self.advance()) return;
+
                 self.length += 1;
             }
 
@@ -145,7 +149,7 @@ pub const Lexer = struct {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.AddEqual);
-                    _ = self.advance();
+                    if (!self.advance()) return;
                 } else {
                     self.addToken(TokenType.Plus);
                 }
@@ -154,7 +158,7 @@ pub const Lexer = struct {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.SubEqual);
-                    _ = self.advance();
+                    if (!self.advance()) return;
                 } else {
                     self.addToken(TokenType.Minus);
                 }
@@ -163,7 +167,7 @@ pub const Lexer = struct {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.MultEqual);
-                    _ = self.advance();
+                    if (!self.advance()) return;
                 } else {
                     self.addToken(TokenType.Star);
                 }
@@ -173,10 +177,10 @@ pub const Lexer = struct {
                 if (cc == '=') {
                     self.length += 1;
                     self.addToken(TokenType.DivEqual);
-                    _ = self.advance();
+                    if (!self.advance()) return;
                 } else if (cc == '/') {
-                    while (self.current() != '\n') {
-                        _ = self.advance();
+                    while ((try self.current()) != '\n') {
+                        if (!self.advance()) return;
                     }
                 } else {
                     self.addToken(TokenType.Div);
@@ -192,7 +196,7 @@ pub const Lexer = struct {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.GreaterEqual);
-                    _ = self.advance();
+                    if (!self.advance()) return;
                 } else {
                     self.addToken(TokenType.Greater);
                 }
@@ -201,7 +205,7 @@ pub const Lexer = struct {
                 if (self.peek() == '=') {
                     self.length += 1;
                     self.addToken(TokenType.LessEqual);
-                    _ = self.advance();
+                    if (!self.advance()) return;
                 } else {
                     self.addToken(TokenType.Less);
                 }
@@ -222,7 +226,7 @@ pub const Lexer = struct {
     }
 
     fn notEof(self: *Lexer) bool {
-        if (self.current() != 0) {
+        if ((try self.current()) != 0) {
             return true;
         } else {
             return false;
@@ -235,10 +239,12 @@ pub const Lexer = struct {
         const save_index = self.index;
         const save_len = self.length;
         self.length = 1;
-        _ = self.advance();
+        if (!self.advance()) return;
+
         var length: usize = 1;
-        while (std.ascii.isAlNum(self.current()) or self.current() == '_') {
-            _ = self.advance();
+        while (std.ascii.isAlNum((try self.current())) or (try self.current()) == '_') {
+            if (!self.advance()) return;
+
             length += 1;
         }
         self.length = save_len;
@@ -343,7 +349,7 @@ pub const Lexer = struct {
 
         var i: u8 = 1;
         while (i <= self.length) : (i += 1) {
-            _ = self.advance();
+            if (!self.advance()) break;
         }
     }
     fn slice(self: *Lexer, len: usize) []const u8 {
@@ -366,12 +372,12 @@ pub const Lexer = struct {
         return self.file.code[self.index + i];
     }
 
-    fn current(self: *Lexer) u8 {
+    fn current(self: *Lexer) !u8 {
         return self.file.code[self.index];
     }
 
     fn advance(self: *Lexer) bool {
-        const c = self.current();
+        const c = try self.current();
         self.next();
         if (c != '\n') {
             self.col += 1;
@@ -380,6 +386,7 @@ pub const Lexer = struct {
             self.line += 1;
             self.lines.append(self.index) catch |err| {
                 log.logErr(@errorName(err));
+                return false;
             };
         }
         return true;
@@ -387,7 +394,7 @@ pub const Lexer = struct {
 
     fn skipWhite(self: *Lexer) void {
         var b: bool = true;
-        while (std.ascii.isSpace(self.current()) and b) {
+        while (self.index < self.file.len and std.ascii.isSpace(try self.current()) and b) {
             b = self.advance();
         }
     }

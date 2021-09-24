@@ -11,9 +11,10 @@
 
 /*
     ROTATE STD LIBRARY
+    ! includes stdio, ctype, limits, stdbool, stdint, stdlib and string header files
     section[0]: stdio
     section[1]: string
-    section[2]: vectors
+    section[2]: math
 */
 
 /* std typedefs */

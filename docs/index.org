@@ -8,7 +8,7 @@
 import "std";
 
 fn main() void {
-  printf("hello World\n");
+  println("hello World");
 }
 #+end_src
 

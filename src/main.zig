@@ -44,4 +44,6 @@ pub fn compile(filename: []const u8, outputfile: []const u8) void {
         output.logInFile(log_file, "{s}", .{@errorName(err)});
         return;
     };
+
+    backend.exportToC(&parsed);
 }
