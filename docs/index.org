@@ -5,8 +5,6 @@
 * Basics
 ** Hello World
 #+begin_src cpp
-import "std";
-
 fn main() void {
   println("hello World");
 }

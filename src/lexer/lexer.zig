@@ -404,7 +404,7 @@ pub const Lexer = struct {
             log.logErr(@errorName(err));
         };
         for (self.tkns.items) |tkn, index| {
-            std.fmt.format(self.log_file.writer(), "{d: ^3}: Token: {s: <10} at {s}:{d}:{d} : \"{s}\"\n", .{
+            std.fmt.format(self.log_file.writer(), "{d: ^5}: Token: {s: <10} at {s}:{d}:{d} : \"{s}\"\n", .{
                 index, tkn.tkn_type.describe(), self.file.name, tkn.pos.line, tkn.pos.col, tkn.value,
             }) catch |err| {
                 log.logErr(@errorName(err));

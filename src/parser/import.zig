@@ -27,17 +27,22 @@ pub fn parseImports(parser: *parse.Parser, lexer: *Lexer, index: *usize, system:
     index.* += 1;
     if (index.* >= lexer.tkns.items.len) {
         const item = lexer.tkns.items[index.* - 1];
-        parse.resetPos(lexer, &item);
+        parse.resetPosSemicolon(lexer, &item);
         return log.Errors.EXP_SEMICOLON;
     }
     if (lexer.tkns.items[index.*].tkn_type == .SemiColon) {
-        parser.gstmts.append(parse.GStmts{ .IMPORT = ImportStmt{ .include = system, .value = &lexer.tkns.items[index.* - 1] } }) catch |err| {
+        parser.gstmts.append(parse.GStmts{
+            .IMPORT = ImportStmt{
+                .include = system,
+                .value = &lexer.tkns.items[index.* - 1],
+            },
+        }) catch |err| {
             log.logErr(@errorName(err));
         };
         return (index.*);
     } else {
         const item = lexer.tkns.items[index.*];
-        parse.resetPos(lexer, &item);
+        parse.resetPosSemicolon(lexer, &item);
         return log.Errors.EXP_SEMICOLON;
     }
 }

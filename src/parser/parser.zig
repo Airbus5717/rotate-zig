@@ -40,15 +40,25 @@ pub const Parser = struct {
     gstmts: ArrayList(GStmts),
 
     pub fn deinit(self: *Parser) void {
-        // temp solution to output to console
-        self.outputStmts();
         self.gstmts.deinit();
     }
 
-    pub fn outputStmts(self: *Parser) void {
-        for (self.gstmts.items) |item| {
-            std.debug.print("{any}\n", .{item});
+    pub fn outputStmts(self: *Parser, output: std.fs.File) void {
+        log.logInFile(output, "## parser \n```\n", .{});
+        for (self.gstmts.items) |item, index| {
+            switch (item) {
+                .IMPORT => |*item2| {
+                    log.logInFile(output, "{d: ^5}: {any}\n\n", .{ index, item2.* });
+                },
+                .GVAR => |*item2| {
+                    log.logInFile(output, "{d: ^5}: {any}\n\n", .{ index, item2.* });
+                },
+                .FUNC => |*item2| {
+                    log.logInFile(output, "{d: ^5}: {any}\n\n", .{ index, item2.* });
+                },
+            }
         }
+        log.logInFile(output, "```\n{s} \n", .{"-" ** 10});
     }
 
     pub fn parse(self: *Parser, lexer: *Lexer) !void {
@@ -75,19 +85,20 @@ pub fn init() !Parser {
 pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
     var i: usize = 0;
     self.done = true;
+    var j: usize = undefined;
     while (i < lexer.tkns.items.len) : (i += 1) {
         var item = lexer.tkns.items[i];
         resetPos(lexer, &item);
         // std.debug.print("bfr parse: {any}\n", .{item});
         switch (item.tkn_type) {
             .Import => {
-                i = try import.parseImports(self, lexer, &i, false);
+                j = try import.parseImports(self, lexer, &i, false);
             },
             .Include => {
-                i = try import.parseImports(self, lexer, &i, true);
+                j = try import.parseImports(self, lexer, &i, true);
             },
             .Let => {
-                i = try variable.parseGVariables(self, lexer, &i);
+                j = try variable.parseGVariables(self, lexer, &i);
             },
             .Function => {
                 // try parseFunctions(item);
@@ -110,4 +121,12 @@ pub fn resetPos(lexer: *Lexer, tkn: *const Token) void {
     lexer.line = tkn.pos.line;
     lexer.index = tkn.pos.index;
     lexer.length = tkn.value.len;
+}
+
+pub fn resetPosSemicolon(lexer: *Lexer, tkn: *const Token) void {
+    const len = tkn.value.len;
+    lexer.col = tkn.pos.col + len;
+    lexer.line = tkn.pos.line;
+    lexer.index = tkn.pos.index;
+    lexer.length = 1;
 }

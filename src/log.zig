@@ -48,6 +48,7 @@ pub fn isCustomError(err: Errors) bool {
 
 pub fn describe(err: Errors) []const u8 {
     switch (err) {
+        Errors.UNKNOWN_TOKEN => return "Unknown Token",
         Errors.END_OF_FILE => return "Reached end of file",
         Errors.UNIMPLEMENTED => return "TODO: Error string",
         Errors.NOT_CLOSED_STR => return "String not closed",
@@ -56,14 +57,18 @@ pub fn describe(err: Errors) []const u8 {
         Errors.EXP_STR_AFTER_INCLUDE => return "String expected after keyword `include`",
         Errors.EXP_SEMICOLON => return "Semicolon expected",
         Errors.EXP_ID_AFTER_LET => return "Identifier expected after keyword `let`",
+        Errors.EXP_EQUAL_AFTER_ID => return "Equal expected after identifier",
+        Errors.EXP_VALUE_AFTER_EQL => return "Variable requires a value",
+        Errors.NO_MUT_GL_VARS => return "Global variables cannot be mutable",
         Errors.NOT_ALLOWED_AT_GLOBAL => return "Found global token at its forbidden scope",
 
-        else => return "Unknown Token",
+        else => return "TODO err msg",
     }
 }
 
 pub fn advice(err: Errors) []const u8 {
     switch (err) {
+        Errors.UNKNOWN_TOKEN => return "Remove the unknown token",
         Errors.END_OF_FILE => return "Reached end of file",
         Errors.UNIMPLEMENTED => return "Error string unimplemented",
         Errors.NOT_CLOSED_STR => return "Close string with double quotes",
@@ -72,8 +77,12 @@ pub fn advice(err: Errors) []const u8 {
         Errors.EXP_STR_AFTER_INCLUDE => return "Add a string after keyword `include`",
         Errors.EXP_SEMICOLON => return "Add a semicolon",
         Errors.EXP_ID_AFTER_LET => return "Add an Identifier after keyword `let`",
-        Errors.NOT_ALLOWED_AT_GLOBAL => return "Don't put this token in global scope",
-        else => return "Remove the unknown token",
+        Errors.EXP_EQUAL_AFTER_ID => return "Add an equal symbol `=` after identifier",
+        Errors.EXP_VALUE_AFTER_EQL => return "Add a value to variable",
+        Errors.NO_MUT_GL_VARS => return "Remove the mutable `mut` keyword",
+        Errors.NOT_ALLOWED_AT_GLOBAL => return "Remove this token",
+
+        else => return "Error message unimplemented",
     }
 }
 

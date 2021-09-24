@@ -75,6 +75,7 @@ pub const TokenType = enum(u8) {
     Void, // 'void'
     Skip, // 'continue' alternative
     Defer, // `defer`
+    Null,
 
     pub fn describe(self: TokenType) []const u8 {
         return @tagName(self);
