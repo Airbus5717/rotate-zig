@@ -27,10 +27,7 @@ pub fn parseImports(parser: *parse.Parser, lexer: *Lexer, index: *usize, system:
     index.* += 1;
     if (index.* >= lexer.tkns.items.len) {
         const item = lexer.tkns.items[index.* - 1];
-        lexer.col = item.pos.col;
-        lexer.line = item.pos.line;
-        lexer.index = item.pos.index;
-        lexer.length = item.value.len;
+        parse.resetPos(lexer, &item);
         return log.Errors.EXP_SEMICOLON;
     }
     if (lexer.tkns.items[index.*].tkn_type == .SemiColon) {
@@ -40,10 +37,7 @@ pub fn parseImports(parser: *parse.Parser, lexer: *Lexer, index: *usize, system:
         return (index.*);
     } else {
         const item = lexer.tkns.items[index.*];
-        lexer.col = item.pos.col;
-        lexer.line = item.pos.line;
-        lexer.index = item.pos.index;
-        lexer.length = item.value.len;
+        parse.resetPos(lexer, &item);
         return log.Errors.EXP_SEMICOLON;
     }
 }

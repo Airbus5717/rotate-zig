@@ -82,16 +82,19 @@ pub fn errorLog(error_describe: []const u8, error_advice: []const u8, err_num: u
     // std.debug.print("col: {d}, line: {d}\n{c}\n", .{ lexer.col, lexer.length, lexer.file.code[lexer.index] });
     try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}{s}\n", .{ BOLD, LRED, err_num, LCYAN, error_describe, RESET });
 
+    // std.debug.print("{d}, {any}, {d}\n", .{lexer.file.code.len, lexer.lines.items, lexer.line - 1});
     if (location) {
         var i: usize = 0;
         while (lexer.file.code[lexer.index + i] != '\n') {
             i += 1;
         }
+        // std.debug.print("index: {d}\n", .{i});
         var src: []const u8 = undefined;
         if (lexer.line == 1) {
             src = lexer.file.code[0..(lexer.index + i)];
         } else {
-            src = lexer.file.code[lexer.lines.items[(lexer.lines.items.len - 1)]..(lexer.index + i)];
+            const lines = lexer.lines.items;
+            src = lexer.file.code[lines[lexer.line - 2]..(lexer.index + i)];
         }
         // std.debug.print("{s}\n", .{src});
         // const distance = try std.math.sub(usize, lexer.col, lexer.length);

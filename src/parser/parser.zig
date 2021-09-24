@@ -77,10 +77,7 @@ pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
     self.done = true;
     while (i < lexer.tkns.items.len) : (i += 1) {
         var item = lexer.tkns.items[i];
-        lexer.col = item.pos.col;
-        lexer.line = item.pos.line;
-        lexer.index = item.pos.index;
-        lexer.length = item.value.len;
+        resetPos(lexer, &item);
         // std.debug.print("bfr parse: {any}\n", .{item});
         switch (item.tkn_type) {
             .Import => {
@@ -96,17 +93,21 @@ pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
                 // try parseFunctions(item);
             },
             .Struct => {
-                // try parseStructlexer: *Lexerures(item);
+                // try parseStructlexer(item);
             },
             else => {
                 self.done = false;
-                item = lexer.tkns.items[i - 1];
-                lexer.col = item.pos.col;
-                lexer.line = item.pos.line;
-                lexer.index = item.pos.index;
-                lexer.length = item.value.len;
+                item = lexer.tkns.items[if (i > 0) i else 0];
+                resetPos(lexer, &item);
                 return log.Errors.NOT_ALLOWED_AT_GLOBAL;
             },
         }
     }
+}
+
+pub fn resetPos(lexer: *Lexer, tkn: *const Token) void {
+    lexer.col = tkn.pos.col;
+    lexer.line = tkn.pos.line;
+    lexer.index = tkn.pos.index;
+    lexer.length = tkn.value.len;
 }
