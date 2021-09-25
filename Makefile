@@ -1,6 +1,6 @@
 BIN ?= ./zig-out/bin/rotate
 
-run:
+run: fmt
 	@zig build run
 
 fast: fmt
@@ -16,7 +16,7 @@ fmt:
 	@zig fmt .
 
 clean:
-	@rm -rf ./zig-out/ ./zig-cache/ output.md callgrind.out*
+	@rm -rf ./zig-out/ ./zig-cache/ output.md callgrind.out* main.c
 
 analyze:
 	@valgrind --tool=callgrind $(BIN)

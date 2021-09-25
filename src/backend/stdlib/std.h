@@ -1,3 +1,12 @@
+// $$\                                 $$\
+// $$ |                                $$ |
+// $$$$$$$\   $$$$$$\   $$$$$$\   $$$$$$$ | $$$$$$\   $$$$$$\
+// $$  __$$\ $$  __$$\  \____$$\ $$  __$$ |$$  __$$\ $$  __$$\
+// $$ |  $$ |$$$$$$$$ | $$$$$$$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
+// $$ |  $$ |$$   ____|$$  __$$ |$$ |  $$ |$$   ____|$$ |
+// $$ |  $$ |\$$$$$$$\ \$$$$$$$ |\$$$$$$$ |\$$$$$$$\ $$ |
+// \__|  \__| \_______| \_______| \_______| \_______|\__|
+
 #ifndef STD_LIB_ROTATE_HEADER
 #define STD_LIB_ROTATE_HEADER
 
@@ -45,4 +54,4 @@ char *remove_last_chars(const char *str, const size_t char_count);
 char *shorten_str(char *str, const size_t char_count);
 // get length of string with null terminator
 
-#endif
+#endif /* end of STD_LIB_ROTATE_HEADER  */

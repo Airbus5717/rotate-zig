@@ -4,6 +4,7 @@ const expect = @import("std").testing.expect;
 const Lexer = @import("lexer/lexer.zig").Lexer;
 const parser = @import("parser/parser.zig");
 const Parser = parser.Parser;
+const main = @import("main.zig");
 
 pub const Errors = error{
     UNKNOWN_TOKEN,
@@ -44,6 +45,13 @@ pub fn isCustomError(err: Errors) bool {
         else => return false,
     }
     return false;
+}
+
+pub fn locationNeeded(err: Errors) bool {
+    switch (err) {
+        Errors.END_OF_FILE => return false,
+        else => return true,
+    }
 }
 
 pub fn describe(err: Errors) []const u8 {
@@ -92,6 +100,7 @@ pub fn errorLog(error_describe: []const u8, error_advice: []const u8, err_num: u
     try std.io.getStdErr().writer().print("{s}{s}error[{d:0>4}]: {s}{s}{s}\n", .{ BOLD, LRED, err_num, LCYAN, error_describe, RESET });
 
     // std.debug.print("{d}, {any}, {d}\n", .{lexer.file.code.len, lexer.lines.items, lexer.line - 1});
+    try std.io.getStdErr().writer().print("{s}{s}--> {s}:{d}:{d}{s}\n", .{ BOLD, LGREEN, lexer.file.name, lexer.line, lexer.col, RESET });
     if (location) {
         var i: usize = 0;
         while (lexer.file.code[lexer.index + i] != '\n') {
@@ -108,7 +117,6 @@ pub fn errorLog(error_describe: []const u8, error_advice: []const u8, err_num: u
         // std.debug.print("{s}\n", .{src});
         // const distance = try std.math.sub(usize, lexer.col, lexer.length);
         // std.debug.print("{d}\n", .{distance});
-        try std.io.getStdErr().writer().print("{s}{s}--> {s}:{d}:{d}\n", .{ BOLD, LGREEN, lexer.file.name, lexer.line, lexer.col });
         try std.io.getStdErr().writer().print("{d} {s}┃{s} {s}\n", .{ lexer.line, LYELLOW, RESET, src });
         try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{ LYELLOW, (" " ** 2048)[0..lexer.col], LRED, ("^" ** 2048)[0..lexer.length], LYELLOW, error_advice, RESET });
     }
@@ -121,7 +129,7 @@ pub fn logInFile(file: std.fs.File, comptime fmt: []const u8, args: anytype) voi
 }
 
 pub fn printLog(error_type: Errors, lexer: *Lexer) void {
-    errorLog(describe(error_type), advice(error_type), @errorToInt(error_type), true, lexer) catch |err| {
+    errorLog(describe(error_type), advice(error_type), @errorToInt(error_type), if (locationNeeded(error_type)) true else false, lexer) catch |err| {
         logErr(@errorName(err));
     };
 }

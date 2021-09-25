@@ -6,22 +6,26 @@ const config = @import("config.zig");
 const parser = @import("parser/parser.zig");
 const backend = @import("backend/c.zig");
 
+pub var log_file: std.fs.File = undefined;
+
 pub fn main() void {
     const filename = "main.vr";
     const outputfile = "main.c";
-    compile(filename, outputfile);
-}
-
-pub fn compile(filename: []const u8, outputfile: []const u8) void {
-    const log_file = std.fs.cwd().createFile(
-        config.log_output,
-        .{ .read = true },
-    ) catch |err| {
+    compile(filename, outputfile) catch |err| {
         output.logErr(@errorName(err));
         return;
     };
+}
+
+pub fn compile(filename: []const u8, outputfile: []const u8) !void {
+    // log file
+    log_file = try std.fs.cwd().createFile(
+        config.log_output,
+        .{ .read = true },
+    );
     defer log_file.close();
 
+    // lexer
     var lex = lexer.initLexer(filename, log_file) catch |err| {
         output.logErr(@errorName(err));
         return;
@@ -32,18 +36,26 @@ pub fn compile(filename: []const u8, outputfile: []const u8) void {
         output.printLog(err, &lex);
         return;
     };
-    lex.outputTokens();
-    _ = outputfile;
-    if (!lex.done) return;
+    // lex.outputTokens();
+    if (!lex.done) {
+        output.logErr("lexer file");
+        return;
+    }
+
+    // parser
     var parsed = parser.init() catch |err| {
         output.logErr(@errorName(err));
         return;
     };
     defer parsed.deinit();
     parsed.parse(&lex) catch |err| {
-        output.logInFile(log_file, "{s}", .{@errorName(err)});
+        output.logErr(@errorName(err));
         return;
     };
-    parsed.outputStmts(log_file);
-    backend.exportToC(&parsed, outputfile);
+    // parsed.outputStmts(log_file);
+
+    // c backend
+    backend.exportToC(&parsed, outputfile) catch |err| {
+        output.logErr(@errorName(err));
+    };
 }
