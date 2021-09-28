@@ -13,16 +13,6 @@ const variable = @import("./var.zig");
 const import = @import("./import.zig");
 const func = @import("func.zig");
 
-const NodeEnum = enum {
-    tkn,
-    bin_op_tkn,
-};
-
-pub const Node = union(NodeEnum) {
-    tkn: *Token,
-    bin_op_tkn: expr.BinaryExprTkn,
-};
-
 pub const GStmtsEnum = enum {
     IMPORT,
     GVAR,

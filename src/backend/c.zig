@@ -7,6 +7,7 @@ const Token = @import("../lexer/tokens.zig").Token;
 const TokenType = @import("../lexer/tokens.zig").TokenType;
 const ImportStmt = @import("../parser/import.zig").ImportStmt;
 const variable = @import("../parser/var.zig");
+const Expr = @import("../parser/expr.zig").Expr;
 
 pub fn exportToC(parser: *Parser, outputfile: []const u8) !void {
     const cfile = @embedFile("./stdlib/std.c");
@@ -47,17 +48,17 @@ pub fn convertParserToC(output: std.fs.File, parser: *Parser) !void {
     for (parser.gstmts.items) |item| {
         switch (item) {
             .IMPORT => |*item2| {
-                try exportImports(item2.*, output);
+                try exportImports(&item2.*, output);
             },
             .GVAR => |*item2| {
-                try exportGVars(item2.*, output);
+                try exportGVars(&item2.*, output);
             },
             else => {},
         }
     }
 }
 
-fn exportImports(import: ImportStmt, output: std.fs.File) !void {
+fn exportImports(import: *const ImportStmt, output: std.fs.File) !void {
     const val = import.value.value;
     if (import.include) {
         try std.fmt.format(output.writer(), "#include <{s}.h>\n", .{val[1 .. val.len - 1]});
@@ -66,10 +67,28 @@ fn exportImports(import: ImportStmt, output: std.fs.File) !void {
     }
 }
 
-fn exportGVars(@"var": variable.Variable, output: std.fs.File) !void {
-    try std.fmt.format(output.writer(), "const {s} {s} = {s};\n", .{
-        rotateToC(@"var".var_type), @"var".id.*, @"var".value.tkn.value,
-    });
+fn exportGVars(@"var": *const variable.Variable, output: std.fs.File) !void {
+    switch (@"var".value) {
+        .group => {
+            std.debug.print("group in gvar export\n", .{});
+            std.os.exit(1);
+        },
+        .binary => {
+            std.debug.print("binary in gvar export\n", .{});
+            std.os.exit(1);
+        },
+        .unary => {
+            std.debug.print("unary in gvar export\n", .{});
+            std.os.exit(1);
+        },
+        .literal => |*val| {
+            std.debug.print("literal in gvar export\n", .{});
+            // std.debug.print("{any}\n", .{val.tkn.value});
+            try std.fmt.format(output.writer(), "const {s} {s} = {s};\n", .{
+                rotateToC(@"var".var_type), @"var".id.*, val.tkn.value,
+            });
+        },
+    }
 }
 
 pub fn rotateToC(tkn_type: TokenType) ![]const u8 {

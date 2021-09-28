@@ -6,13 +6,16 @@ const TokenType = @import("../lexer/tokens.zig").TokenType;
 const log = @import("../log.zig");
 const parse = @import("./parser.zig");
 const typeChecker = @import("./type.zig");
+const expr = @import("./expr.zig");
+const Expr = expr.Expr;
+const LiteralExpr = expr.LiteralExpr;
 
 pub const Variable = struct {
     global: bool = undefined,
     immutable: bool = true,
     var_type: TokenType = undefined,
     id: *[]const u8 = undefined,
-    value: parse.Node,
+    value: Expr,
 };
 
 pub const VariableWithType = struct {
@@ -21,6 +24,7 @@ pub const VariableWithType = struct {
 };
 
 pub fn parseGVariables(parser: *parse.Parser, lexer: *Lexer, index: *usize) log.Errors!usize {
+    var gvar: parse.GStmts = undefined;
     index.* += 1;
     if (index.* >= lexer.tkns.items.len) {
         return log.Errors.EXP_ID_AFTER_LET;
@@ -42,20 +46,18 @@ pub fn parseGVariables(parser: *parse.Parser, lexer: *Lexer, index: *usize) log.
         parse.resetPos(lexer, &lexer.tkns.items[index.* - 1]);
         return log.Errors.EXP_VALUE_AFTER_EQL;
     } else if (typeChecker.isVal(lexer.tkns.items[index.*].tkn_type)) {
-        const gvar = parse.GStmts{
+        gvar = parse.GStmts{
             .GVAR = Variable{
                 .global = true,
                 .immutable = true,
                 .id = &lexer.tkns.items[index.* - 2].value,
                 .var_type = typeChecker.getType(lexer.tkns.items[index.*].tkn_type),
-                .value = .{
-                    .tkn = &lexer.tkns.items[index.*],
+                .value = Expr{
+                    .literal = LiteralExpr{
+                        .tkn = &lexer.tkns.items[index.*],
+                    },
                 },
             },
-        };
-        parser.gstmts.append(gvar) catch |err| {
-            log.logErr(@errorName(err));
-            return index.*;
         };
     } else {
         parse.resetPos(lexer, &lexer.tkns.items[index.*]);
@@ -70,7 +72,11 @@ pub fn parseGVariables(parser: *parse.Parser, lexer: *Lexer, index: *usize) log.
         parse.resetPosSemicolon(lexer, &lexer.tkns.items[index.*]);
         _ = parser.gstmts.pop();
         return log.Errors.EXP_SEMICOLON;
+    } else {
+        parser.gstmts.append(gvar) catch |err| {
+            log.logErr(@errorName(err));
+            return index.*;
+        };
     }
-
     return index.*;
 }
