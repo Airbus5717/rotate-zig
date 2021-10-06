@@ -1,4 +1,8 @@
-# Rotate Programming Language (Zig implementation)
+#+TITLE: README
+#+AUTHOR: Airbus5717
+#+OPTIONS: toc:nil num:nil
+
+* Rotate Programming Language (Zig implementation)
 
 rotate language in c repo link https://github.com/Airbus5717/rotate-c
 
@@ -6,7 +10,6 @@ rotate language in c repo link https://github.com/Airbus5717/rotate-c
 - check `docs/index.org` for documentation
 - check `src/backend/stdlib` for std library (written in c)
 
-## requirements
-
+** requirements
 - [x] Zig compiler
 - [x] Make

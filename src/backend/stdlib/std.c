@@ -1,18 +1,8 @@
 #include "std.h"
 
-//             $$\           $$\ $$\ $$\ $$\
-//             $$ |          $$ |$$ |\__|$$ |
-//  $$$$$$$\ $$$$$$\    $$$$$$$ |$$ |$$\ $$$$$$$\
-// $$  _____|\_$$  _|  $$  __$$ |$$ |$$ |$$  __$$\
-// \$$$$$$\    $$ |    $$ /  $$ |$$ |$$ |$$ |  $$ |
-//  \____$$\   $$ |$$\ $$ |  $$ |$$ |$$ |$$ |  $$ |
-// $$$$$$$  |  \$$$$  |\$$$$$$$ |$$ |$$ |$$$$$$$  |
-// \_______/    \____/  \_______|\__|\__|\_______/
-
 // ROTATE STD LIBRARY
 // section[0]: stdio
 // section[1]: string
-// section[2]: stdlib
 
 /*
     section[0] (stdio)
@@ -52,7 +42,7 @@ void to_lower_case(char *str)
 // [requires free][returns NULL too] add 2 strings into one string
 char *concat_str(const char *str1, const char *str2)
 {
-    if (str1 && str2)
+    if (str1 && str2) // str1 and str2 != NULL
     {
         size_t len1 = strlen(str1);
         size_t len2 = strlen(str2);
@@ -94,13 +84,4 @@ char *shorten_str(char *str, const size_t char_count)
         return str + new_len;
     }
     return NULL;
-}
-
-/*
-    section[2]: stdlib
-*/
-
-void free_mem(void *ptr)
-{
-    if (ptr) free(ptr);
 }

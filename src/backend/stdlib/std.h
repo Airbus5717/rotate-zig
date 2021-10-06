@@ -43,11 +43,4 @@ char *remove_last_chars(const char *str, const size_t char_count);
 // modified version of remove_last_chars without returning a new string
 char *shorten_str(char *str, const size_t char_count);
 
-/*
-    section[2]: stdlib
-*/
-
-// free memory
-void free_mem(void *ptr);
-
 #endif /* end of STD_LIB_ROTATE_HEADER  */

@@ -1,4 +1,5 @@
 // compiler config
-pub const log_output = "output.md";
+pub var log_output = "output.md";
 // C Backend specific
-pub const spaces = 4;
+pub var spaces = 4;
+pub var seperate_std_c = false;
