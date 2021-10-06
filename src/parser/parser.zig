@@ -76,6 +76,7 @@ pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
     var i: usize = 0;
     self.done = true;
     var j: usize = undefined;
+    var err_count: usize = 0;
     while (i < lexer.tkns.items.len) : (i += 1) {
         var item = lexer.tkns.items[i];
         resetPos(lexer, &item);
@@ -98,9 +99,11 @@ pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
             },
             else => {
                 self.done = false;
+                err_count += 1;
                 item = lexer.tkns.items[if (i > 0) i else 0];
                 resetPos(lexer, &item);
-                return log.Errors.NOT_ALLOWED_AT_GLOBAL;
+                log.printLog(log.Errors.NOT_ALLOWED_AT_GLOBAL, lexer);
+                if (err_count < 3) continue else return;
             },
         }
     }

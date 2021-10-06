@@ -399,6 +399,15 @@ pub const Lexer = struct {
         }
     }
 
+    fn debugPos(self: *Lexer) void {
+        std.debug.print("index: {d}\nline: {d}\ncol: {d}\nlen: {d}\n", .{
+            self.index,
+            self.line,
+            self.col,
+            self.length,
+        });
+    }
+
     pub fn outputTokens(self: *Lexer) void {
         std.fmt.format(self.log_file.writer(), "{s}\n## lexer \n```\n", .{"-" ** 10}) catch |err| {
             log.logErr(@errorName(err));

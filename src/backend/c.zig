@@ -20,7 +20,7 @@ pub fn exportToC(parser: *Parser, outputfile: []const u8) !void {
     );
     defer output.close();
     const clib_output = blk: {
-        if (config.seperate_std_c) {
+        if (config.seperate_std_c and config.export_std) {
             one_file = false;
             break :blk try std.fs.cwd().createFile(
                 "std.c",
@@ -41,17 +41,21 @@ pub fn exportToC(parser: *Parser, outputfile: []const u8) !void {
             break :blk output;
         }
     };
-    try clib_output_header.writeAll(header ++ "\n");
-    if (config.seperate_std_c) {
-        try output.writeAll("#include \"std.h\"\n");
+
+    if (config.export_std) {
+        try clib_output_header.writeAll(header ++ "\n");
+        if (config.seperate_std_c) {
+            try output.writeAll("#include \"std.h\"\n");
+        }
+        try output.writeAll("// code begin here\n");
     }
-    // export code here
-    try output.writeAll("// code begin here\n");
+
     try convertParserToC(output, parser);
-    try output.writeAll("\n// code end here\n");
-    // end export here
-    // std lib
-    try clib_output.writeAll(if (!config.seperate_std_c) cfile[17..cfile.len] else cfile);
+
+    if (config.export_std) {
+        try output.writeAll("\n// code end here\n");
+        try clib_output.writeAll(if (!config.seperate_std_c) cfile[17..cfile.len] else cfile);
+    }
     if (!one_file) clib_output.close();
 }
 
