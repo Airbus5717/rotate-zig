@@ -3,7 +3,7 @@
 #+OPTIONS: toc:nil num:nil html-style:nil
 
 * Rotate Programming Language (Zig implementation)
-
+Rotate is basically a c code generator
 
 - will use c allocator
 - check `docs/index.org` for documentation
