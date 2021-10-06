@@ -5,8 +5,9 @@
 * Basics
 ** Hello World
 #+begin_src cpp
-fn main() void {
-  println("hello World");
+fn main() int {
+  println("Hello World");
+  return 0;
 }
 #+end_src
 

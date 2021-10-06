@@ -1,6 +1,6 @@
 #+TITLE: LICENSE
 #+AUTHOR: Airbus5717
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil html-style:nil
 
 * MIT License
 

@@ -4,26 +4,31 @@
 // section[0]: stdio
 // section[1]: string
 
-/*
-    section[0] (stdio)
-*/
-// print without newline
+//
+// section[0] (stdio)
+//
 void print(const char *str)
 {
     printf("%s", (str ? str : "NULL"));
 }
 
-// print with newline
 void println(const char *str)
 {
     puts((str ? str : "NULL"));
 }
 
-/*
-    section[1] (string)
-*/
+//
+// section[1] (string)
+//
+char *string(char *str)
+{
+    size_t len = strlen(str);
+    char *res = malloc(len + 1);
+    memcpy(res, str, len);
+    res[len] = '\0';
+    return res;
+}
 
-// convert string to upper case [O(n)]
 void to_upper_case(char *str)
 {
     if (str) // str != NULL
@@ -31,7 +36,6 @@ void to_upper_case(char *str)
             str[i] = toupper(str[i]);
 }
 
-// convert to lower case [O(n)]
 void to_lower_case(char *str)
 {
     if (str) // str != NULL
@@ -39,7 +43,6 @@ void to_lower_case(char *str)
             str[i] = tolower(str[i]);
 }
 
-// [requires free][returns NULL too] add 2 strings into one string
 char *concat_str(const char *str1, const char *str2)
 {
     if (str1 && str2) // str1 and str2 != NULL
@@ -56,8 +59,6 @@ char *concat_str(const char *str1, const char *str2)
     return NULL;
 }
 
-// [requires free][returns NULL too] remove last char_count among of chars from a string
-// returns a new string
 char *remove_last_chars(const char *str, const size_t char_count)
 {
     if (str) // str != NULL
@@ -72,8 +73,6 @@ char *remove_last_chars(const char *str, const size_t char_count)
     return NULL;
 }
 
-// modified version of remove_last_chars without
-// returning a new string
 char *shorten_str(char *str, const size_t char_count)
 {
     if (str) // str != NULL
