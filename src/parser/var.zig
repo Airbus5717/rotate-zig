@@ -45,7 +45,7 @@ pub fn parseGVariables(parser: *parse.Parser, lexer: *Lexer, index: *usize) log.
     if (index.* >= lexer.tkns.items.len) {
         parse.resetPos(lexer, &lexer.tkns.items[index.* - 1]);
         return log.Errors.EXP_VALUE_AFTER_EQL;
-    } else if (typeChecker.isVal(lexer.tkns.items[index.*].tkn_type)) {
+    } else if (typeChecker.isLiteral(lexer.tkns.items[index.*].tkn_type)) {
         gvar = parse.GStmts{
             .GVAR = Variable{
                 .global = true,

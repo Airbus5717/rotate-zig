@@ -19,11 +19,11 @@ pub fn main() void {
 
 pub fn compile(filename: []const u8, outputfile: []const u8) !void {
     // log file
-    log_file = try std.fs.cwd().createFile(
-        config.log_output,
-        .{ .read = true },
-    );
-    defer log_file.close();
+    log_file = undefined; // try std.fs.cwd().createFile(
+    // config.log_output,
+    // .{ .read = true },
+    // );
+    // defer log_file.close();
 
     // lexer
     var lex = lexer.initLexer(filename, log_file) catch |err| {

@@ -76,6 +76,8 @@ pub const TokenType = enum(u8) {
     Skip, // 'continue' alternative
     Defer, // `defer`
     Null,
+    Long,
+    LongKeyword,
     Type,
 
     pub fn describe(self: TokenType) []const u8 {

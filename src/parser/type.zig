@@ -1,9 +1,9 @@
 const Token = @import("../lexer/tokens.zig").Token;
 const TokenType = @import("../lexer/tokens.zig").TokenType;
 
-pub fn isVal(tkn_type: TokenType) bool {
+pub fn isLiteral(tkn_type: TokenType) bool {
     switch (tkn_type) {
-        .String, .Integer, .Float, .Char, .True, .False => return true,
+        .String, .Integer, .Long, .Float, .Char, .True, .False => return true,
         else => return false,
     }
 }
@@ -15,6 +15,7 @@ pub fn getType(tkn_type: TokenType) TokenType {
         .True, .False => return .BoolKeyword,
         .Float => return .FloatKeyword,
         .Integer => return .IntKeyword,
+        .Long => return .LongKeyword,
         else => return .Null,
     }
 }

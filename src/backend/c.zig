@@ -98,6 +98,7 @@ pub fn rotateToC(tkn_type: TokenType) ![]const u8 {
         .FloatKeyword => return "double",
         .BoolKeyword => return "bool",
         .StringKeyword => return "char *",
+        .LongKeyword => return "long",
         else => {
             return log.Errors.UNIMPLEMENTED;
         },

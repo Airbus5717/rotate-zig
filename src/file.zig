@@ -18,8 +18,9 @@ pub fn readFile(filename: []const u8, output: std.fs.File) !SrcFile {
         return error{OutOfMemory}.OutOfMemory;
     }
     const code = SrcFile{ .code = try std.fs.cwd().readFileAlloc(allocator, filename, len), .len = len, .name = filename };
-    std.fmt.format(output.writer(), "## source code\n{s}rs\n{s} \n{s}\n", .{ "`" ** 3, code.code, "`" ** 3 }) catch |err| {
-        log.logErr(@errorName(err));
-    };
+    // std.fmt.format(output.writer(), "## source code\n{s}rs\n{s} \n{s}\n", .{ "`" ** 3, code.code, "`" ** 3 }) catch |err| {
+    //     log.logErr(@errorName(err));
+    // };
+    _ = output;
     return code;
 }

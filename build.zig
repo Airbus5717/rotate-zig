@@ -1,6 +1,6 @@
-const std = @import("std");
+const Builder = @import("std").build.Builder;
 
-pub fn build(b: *std.build.Builder) void {
+pub fn build(b: *Builder) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
 

@@ -1,12 +1,3 @@
-// $$\                                 $$\
-// $$ |                                $$ |
-// $$$$$$$\   $$$$$$\   $$$$$$\   $$$$$$$ | $$$$$$\   $$$$$$\
-// $$  __$$\ $$  __$$\  \____$$\ $$  __$$ |$$  __$$\ $$  __$$\
-// $$ |  $$ |$$$$$$$$ | $$$$$$$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
-// $$ |  $$ |$$   ____|$$  __$$ |$$ |  $$ |$$   ____|$$ |
-// $$ |  $$ |\$$$$$$$\ \$$$$$$$ |\$$$$$$$ |\$$$$$$$\ $$ |
-// \__|  \__| \_______| \_______| \_______| \_______|\__|
-
 #ifndef STD_LIB_ROTATE_HEADER
 #define STD_LIB_ROTATE_HEADER
 
@@ -21,10 +12,9 @@
 
 /*
     ROTATE STD LIBRARY
-    ! includes stdio, ctype, limits, stdbool, stdint, stdlib, stdarg and string header files
     section[0]: stdio
     section[1]: string
-    section[2]: math
+    section[2]: stdlib
 */
 
 /* std typedefs */
@@ -42,9 +32,9 @@ void println(const char *str);
 */
 
 // convert to upper case
-char *to_upper_case(char *str);
+void to_upper_case(char *str);
 // convert to lower case
-char *to_lower_case(char *str);
+void to_lower_case(char *str);
 // [requires free][returns NULL too] add 2 strings into one string
 char *concat_str(const char *str1, const char *str2);
 // [requires free][returns NULL too] remove last char_count among of chars from a string
@@ -52,6 +42,12 @@ char *concat_str(const char *str1, const char *str2);
 char *remove_last_chars(const char *str, const size_t char_count);
 // modified version of remove_last_chars without returning a new string
 char *shorten_str(char *str, const size_t char_count);
-// get length of string with null terminator
+
+/*
+    section[2]: stdlib
+*/
+
+// free memory
+void free_mem(void *ptr);
 
 #endif /* end of STD_LIB_ROTATE_HEADER  */

@@ -76,7 +76,7 @@ pub const Lexer = struct {
             if (reached_dot) {
                 self.addToken(TokenType.Float);
             } else {
-                self.addToken(TokenType.Integer);
+                self.addToken(if (self.length < 10) TokenType.Integer else TokenType.Long);
             }
             return;
         } else if (c == '"') {
