@@ -11,13 +11,10 @@ pub var log_file: std.fs.File = undefined;
 pub fn main() void {
     const filename = "main.vr";
     const outputfile = "main.c";
-    compile(filename, outputfile) catch |err| {
-        output.logErr(@errorName(err));
-        return;
-    };
+    compile(filename, outputfile);
 }
 
-pub fn compile(filename: []const u8, outputfile: []const u8) !void {
+pub fn compile(filename: []const u8, outputfile: []const u8) void {
     // log file
     log_file = undefined; // try std.fs.cwd().createFile(
     // config.log_output,
@@ -38,24 +35,21 @@ pub fn compile(filename: []const u8, outputfile: []const u8) !void {
     };
     // lex.outputTokens();
     if (!lex.done) {
-        output.logErr("lexer file");
+        output.logErr("lexer failure");
         return;
     }
 
     // parser
-    var parsed = parser.init() catch |err| {
-        output.logErr(@errorName(err));
+    var parsed = parser.init() catch {
         return;
     };
     defer parsed.deinit();
-    parsed.parse(&lex) catch |err| {
-        output.logErr(@errorName(err));
-        return;
-    };
+    parsed.parse(&lex);
     // parsed.outputStmts(log_file);
 
     // c backend
     backend.exportToC(&parsed, outputfile) catch |err| {
         output.logErr(@errorName(err));
+        return;
     };
 }

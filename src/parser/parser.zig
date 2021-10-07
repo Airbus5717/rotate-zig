@@ -51,17 +51,10 @@ pub const Parser = struct {
         log.logInFile(output, "```\n{s} \n", .{"-" ** 10});
     }
 
-    pub fn parse(self: *Parser, lexer: *Lexer) !void {
+    pub fn parse(self: *Parser, lexer: *Lexer) void {
         parseNErrorHandle(self, lexer) catch |err| {
-            // std.debug.print("reached err handling in parse function: {s},\n", .{@errorName(err)});
-            if (log.isCustomError(err)) {
-                log.printLog(err, lexer);
-            } else {
-                log.logErr(@errorName(err));
-            }
-            // log.errorLog(log.describe(err), log.advice(err), @errorToInt(err), true, lexer);
-            self.done = false;
-            return err;
+            _ = @errorName(err);
+            // log.logErr(@errorName(err));
         };
     }
 };
@@ -83,16 +76,17 @@ pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
         // std.debug.print("bfr parse: {any}\n", .{item});
         switch (item.tkn_type) {
             .Import => {
-                j = try import.parseImports(self, lexer, &i, false);
+                i = try import.parseImports(self, lexer, &i, false);
             },
             .Include => {
-                j = try import.parseImports(self, lexer, &i, true);
+                i = try import.parseImports(self, lexer, &i, true);
             },
             .Let => {
-                j = try variable.parseGVariables(self, lexer, &i);
+                i = try variable.parseGVariables(self, lexer, &i);
             },
+            .Public => {},
             .Function => {
-                // try parseFunctions(item);
+                j = try func.parseFunctions(self, lexer, &i, false);
             },
             .Struct => {
                 // try parseStructlexer(item);
@@ -103,7 +97,7 @@ pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
                 item = lexer.tkns.items[if (i > 0) i else 0];
                 resetPos(lexer, &item);
                 log.printLog(log.Errors.NOT_ALLOWED_AT_GLOBAL, lexer);
-                if (err_count < 3) continue else return;
+                if (err_count < 3) continue else return log.Errors.NOT_ALLOWED_AT_GLOBAL;
             },
         }
     }

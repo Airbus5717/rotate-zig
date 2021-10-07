@@ -1,5 +1,5 @@
 BIN ?= ./zig-out/bin/rotate
-EXPORT_FILES = std.c std.h *.c *.h
+EXPORT_FILES = *.c *.h
 
 run: fmt
 	@zig build run

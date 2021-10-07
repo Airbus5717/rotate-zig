@@ -1,1 +1,4 @@
-let x = 12;
+fn main() int {
+	println("Hello World");
+	return 0;
+}

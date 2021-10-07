@@ -11,6 +11,7 @@ const variable = @import("../parser/var.zig");
 const Expr = @import("../parser/expr.zig").Expr;
 
 pub fn exportToC(parser: *Parser, outputfile: []const u8) !void {
+    if (!parser.done) return;
     const cfile = @embedFile("./stdlib/std.c");
     const header = @embedFile("./stdlib/std.h");
     var one_file: bool = undefined;
