@@ -13,7 +13,7 @@ pub const ImportStmt = struct {
 
 pub fn parseImports(parser: *parse.Parser, lexer: *Lexer, index: *usize, system: bool) log.Errors!usize {
     index.* += 1;
-
+    // std.debug.print("{d} {any}\n", .{ index.*, lexer.tkns.items });
     if (index.* >= lexer.tkns.items.len) {
         if (system) {
             return log.Errors.EXP_STR_AFTER_INCLUDE;
@@ -31,6 +31,7 @@ pub fn parseImports(parser: *parse.Parser, lexer: *Lexer, index: *usize, system:
         return log.Errors.EXP_SEMICOLON;
     }
     if (lexer.tkns.items[index.*].tkn_type == .SemiColon) {
+        parser.done = true;
         parser.gstmts.append(parse.GStmts{
             .IMPORT = ImportStmt{
                 .include = system,
@@ -38,6 +39,7 @@ pub fn parseImports(parser: *parse.Parser, lexer: *Lexer, index: *usize, system:
             },
         }) catch |err| {
             log.logErr(@errorName(err));
+            parser.done = false;
         };
         return (index.*);
     } else {

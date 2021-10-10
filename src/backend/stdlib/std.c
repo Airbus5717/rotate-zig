@@ -9,12 +9,12 @@
 //
 void print(const char *str)
 {
-    printf("%s", (str ?: "NULL"));
+    printf("%s", (str ?: "null"));
 }
 
 void println(const char *str)
 {
-    puts((str ?: "NULL"));
+    puts((str ?: "null"));
 }
 
 //
@@ -32,15 +32,21 @@ char *string(char *str)
 void to_upper_case(char *str)
 {
     if (str) // str != NULL
-        for (size_t i = 0; str[i] != '\0'; i++)
+    {
+        size_t len = strlen(str);
+        for (size_t i = 0; i < len; i++)
             str[i] = toupper(str[i]);
+    }
 }
 
 void to_lower_case(char *str)
 {
     if (str) // str != NULL
-        for (size_t i = 0; str[i] != '\0'; i++)
+    {
+        size_t len = strlen(str);
+        for (size_t i = 0; i < len; i++)
             str[i] = tolower(str[i]);
+    }
 }
 
 char *concat_str(const char *str1, const char *str2)
@@ -64,6 +70,7 @@ char *remove_last_chars(const char *str, const size_t char_count)
     if (str) // str != NULL
     {
         size_t len = strlen(str);
+        if (len == 0) return NULL;
         char *res = malloc(len + 1);
         if (!res) return NULL;
         memcpy(res, str, len - char_count);
@@ -78,6 +85,7 @@ char *shorten_str(char *str, const size_t char_count)
     if (str) // str != NULL
     {
         size_t len = strlen(str);
+        if (len == 0) return NULL;
         size_t new_len = char_count > len ? 0 : len - char_count;
         str[new_len] = '\0';
         return str + new_len;

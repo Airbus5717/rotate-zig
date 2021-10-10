@@ -9,6 +9,7 @@ pub const ExprEnum = enum {
     binary,
     literal,
     unary,
+    typed_id,
 };
 
 pub const Expr = union(ExprEnum) {
@@ -16,18 +17,24 @@ pub const Expr = union(ExprEnum) {
     binary: BinaryExpr,
     literal: LiteralExpr,
     unary: UnaryExpr,
+    typed_id: LiteralExpr,
 };
 
-pub const GroupExpr = struct {
+pub const GroupExpr = packed struct {
     expr: *Expr,
 };
 
-pub const UnaryExpr = struct {
+pub const UnaryExpr = packed struct {
     op: *Token,
     expr: *Expr,
 };
 
-pub const BinaryExpr = struct {
+pub const TypedId = packed struct {
+    id: *Token,
+    _type: Type,
+};
+
+pub const BinaryExpr = packed struct {
     left: *Expr,
     op: *Token,
     right: *Expr,
@@ -37,6 +44,6 @@ pub const BinaryExpr = struct {
     // }
 };
 
-pub const LiteralExpr = struct {
+pub const LiteralExpr = packed struct {
     tkn: *Token,
 };

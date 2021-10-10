@@ -53,8 +53,7 @@ pub const Parser = struct {
 
     pub fn parse(self: *Parser, lexer: *Lexer) void {
         parseNErrorHandle(self, lexer) catch |err| {
-            _ = @errorName(err);
-            // log.logErr(@errorName(err));
+            log.printLog(err, lexer);
         };
     }
 };
@@ -67,7 +66,7 @@ pub fn init() !Parser {
 
 pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
     var i: usize = 0;
-    self.done = true;
+    self.done = false;
     var j: usize = undefined;
     var err_count: usize = 0;
     while (i < lexer.tkns.items.len) : (i += 1) {
@@ -97,7 +96,7 @@ pub fn parseNErrorHandle(self: *Parser, lexer: *Lexer) log.Errors!void {
                 item = lexer.tkns.items[if (i > 0) i else 0];
                 resetPos(lexer, &item);
                 log.printLog(log.Errors.NOT_ALLOWED_AT_GLOBAL, lexer);
-                if (err_count < 3) continue else return log.Errors.NOT_ALLOWED_AT_GLOBAL;
+                if (err_count < 3) continue else return;
             },
         }
     }

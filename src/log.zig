@@ -4,6 +4,7 @@ const expect = @import("std").testing.expect;
 const Lexer = @import("lexer/lexer.zig").Lexer;
 const parser = @import("parser/parser.zig");
 const Parser = parser.Parser;
+const utils = @import("./utils.zig");
 
 pub const Errors = error{
     UNKNOWN_TOKEN,
@@ -136,7 +137,8 @@ pub fn errorLog(error_describe: []const u8, error_advice: []const u8, err_num: u
             RESET,
             src,
         });
-        try std.io.getStdErr().writer().print("  {s}┃{s}{s}{s}{s} {s}{s}\n", .{
+        try std.io.getStdErr().writer().print("{s} {s}┃{s}{s}{s}{s} {s}{s}\n", .{
+            (" " ** 2048)[0..utils.getDigits(@intCast(u32, lexer.line))],
             LYELLOW,
             (" " ** 2048)[0..lexer.col],
             LRED,
@@ -195,8 +197,3 @@ const LCYAN = "\x1b[96m";
 const LWHITE = "\x1b[97m";
 // reset colors
 const RESET = "\x1b[0m";
-
-test "Error enum" {
-    std.debug.print("{d}", .{@errorToInt(Errors.UNKNOWN_TOKEN)});
-    try expect(@errorToInt(Errors.UNKNOWN_TOKEN) == 60);
-}

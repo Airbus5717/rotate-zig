@@ -79,6 +79,7 @@ pub const TokenType = enum(u8) {
     Long,
     LongKeyword,
     Type,
+    Block, // c code block
 
     pub fn describe(self: TokenType) []const u8 {
         return @tagName(self);
@@ -86,23 +87,24 @@ pub const TokenType = enum(u8) {
 };
 
 pub const Type = enum(u8) {
-    @"int",
-    @"isize",
-    @"usize",
-    @"u8",
-    @"u16",
-    @"u32",
-    @"u64",
-    @"i8",
-    @"i16",
-    @"i32",
-    @"i64",
-    @"f32",
-    @"f64",
-    @"f128",
-    @"char",
-    @"void",
-    @"struct",
+    _int,
+    _isize,
+    _usize,
+    _u8,
+    _u16,
+    _u32,
+    _u64,
+    _i8,
+    _i16,
+    _i32,
+    _i64,
+    _f32,
+    _f64,
+    _f128,
+    _char,
+    _void,
+    _struct,
+    _none,
 
     pub fn describe(self: Type) []const u8 {
         return @tagName(self);
@@ -111,22 +113,23 @@ pub const Type = enum(u8) {
     // zig fmt: off
     pub fn typeToC(self: Type) []const u8 {
         switch (self) {
-            .@"isize"   => return "long long",
-            .@"usize"   => return "size_t",
-            .@"int"     => return "int",
-            .@"f32"     => return "float",
-            .@"f64"     => return "double",
-            .@"f128"    => return "long double",
-            .@"char"    => return "char",
-            .@"void"    => return "void",
-            .@"i8"      => return "int8_t",
-            .@"i16"     => return "int16_t",
-            .@"i32"     => return "int32_t",
-            .@"i64"     => return "int64_t",
-            .@"u8"      => return "uint8_t",
-            .@"u16"     => return "uint16_t",
-            .@"u32"     => return "uint32_t",
-            .@"u64"     => return "uint64_t",
+            ._isize   => return "long long",
+            ._usize   => return "size_t",
+            ._int     => return "int",
+            ._f32     => return "float",
+            ._f64     => return "double",
+            ._f128    => return "long double",
+            ._char    => return "char",
+            ._void    => return "void",
+            ._i8      => return "int8_t",
+            ._i16     => return "int16_t",
+            ._i32     => return "int32_t",
+            ._i64     => return "int64_t",
+            ._u8      => return "uint8_t",
+            ._u16     => return "uint16_t",
+            ._u32     => return "uint32_t",
+            ._u64     => return "uint64_t",
+            ._none    => return "NULL",
         }
     }
     // zig fmt: on
