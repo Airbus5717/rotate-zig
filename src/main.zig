@@ -3,22 +3,22 @@ const std = @import("std");
 const lexer = @import("lexer/lexer.zig");
 const output = @import("log.zig");
 const config = @import("config.zig");
-const parser = @import("parser/parser.zig");
-const backend = @import("backend/c.zig");
 
 pub var log_file: std.fs.File = undefined;
 
 pub fn main() void {
     const filename = "main.vr";
     const outputfile = "main.c";
-    compile(filename, outputfile);
+    compile(filename, outputfile) catch |err| {
+        output.logErr(@errorName(err));
+    };
 }
 
-pub fn compile(filename: []const u8, outputfile: []const u8) void {
+pub fn compile(filename: []const u8, outputfile: []const u8) !void {
     // log file
     log_file = undefined; // try std.fs.cwd().createFile(
-    // config.log_output,
-    // .{ .read = true },
+    //     config.log_output,
+    //     .{ .read = true },
     // );
     // defer log_file.close();
 
@@ -39,17 +39,5 @@ pub fn compile(filename: []const u8, outputfile: []const u8) void {
         return;
     }
 
-    // parser
-    var parsed = parser.init() catch {
-        return;
-    };
-    defer parsed.deinit();
-    parsed.parse(&lex);
-    // parsed.outputStmts(log_file);
-
-    // c backend
-    backend.exportToC(&parsed, outputfile) catch |err| {
-        output.logErr(@errorName(err));
-        return;
-    };
+    _ = outputfile;
 }

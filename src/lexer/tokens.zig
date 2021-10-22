@@ -28,7 +28,7 @@ pub const TokenType = enum(u8) {
     Newline, // ! '\n' Weird Token
     SemiColon, // ;
     Colon, // :
-    Function, // 'fn'pub const Pos = struct {
+    Function, // 'fn'
     LeftParen, // (
     RightParen, // )
     LeftCurly, // {
@@ -42,7 +42,6 @@ pub const TokenType = enum(u8) {
     Else, // 'else'
     For, // 'for'
     While, // 'while'
-    Arrow, // ->
     Greater, // >
     GreaterEqual, // >=
     Less, // <
@@ -75,11 +74,12 @@ pub const TokenType = enum(u8) {
     Void, // 'void'
     Skip, // 'continue' alternative
     Defer, // `defer`
-    Null,
-    Long,
-    LongKeyword,
-    Type,
+    Nil, // `nil`
+    Long, // long
+    LongKeyword, // `long`
+    Type, // type
     Block, // c code block
+    Builtin, // zig like builtins @identifer
 
     pub fn describe(self: TokenType) []const u8 {
         return @tagName(self);

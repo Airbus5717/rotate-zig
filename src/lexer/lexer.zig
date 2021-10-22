@@ -8,7 +8,6 @@ const Errors = log.Errors;
 const token = @import("tokens.zig");
 const Token = token.Token;
 const TokenType = token.TokenType;
-const Pos = token.Pos;
 
 pub const Lexer = struct {
     tkns: ArrayList(Token),
@@ -62,9 +61,7 @@ pub const Lexer = struct {
                 if ((try self.current()) == '.') {
                     if (reached_dot) {
                         break;
-                    } else {
-                        reached_dot = true;
-                    }
+                    } else reached_dot = true;
                 }
                 if (!self.advance()) return;
 
@@ -431,7 +428,7 @@ pub const Lexer = struct {
 
 pub fn initLexer(filename: []const u8, logfile: std.fs.File) !Lexer {
     var self = Lexer{
-        .tkns = ArrayList(Token).init(allocator),
+        .tkns = undefined,
         .lines = ArrayList(usize).init(allocator),
         .index = 0,
         .begin = 0,
@@ -442,5 +439,6 @@ pub fn initLexer(filename: []const u8, logfile: std.fs.File) !Lexer {
         .log_file = logfile,
     };
     self.file = (try file.readFile(filename, logfile));
+    self.tkns = try ArrayList(Token).initCapacity(allocator, self.file.len / 20);
     return self;
 }

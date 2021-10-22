@@ -2,8 +2,6 @@ const std = @import("std");
 const expect = @import("std").testing.expect;
 
 const Lexer = @import("lexer/lexer.zig").Lexer;
-const parser = @import("parser/parser.zig");
-const Parser = parser.Parser;
 const utils = @import("./utils.zig");
 
 pub const Errors = error{
@@ -57,7 +55,7 @@ pub fn locationNeeded(err: Errors) bool {
 pub fn describe(err: Errors) []const u8 {
     switch (err) {
         Errors.UNKNOWN_TOKEN => return "Unknown Token",
-        Errors.END_OF_FILE => return "Reached end of file",
+        Errors.END_OF_FILE => return "Fily empty",
         Errors.UNIMPLEMENTED => return "TODO: Error string",
         Errors.NOT_CLOSED_STR => return "String not closed",
         Errors.NOT_CLOSED_CHAR => return "Char not closed",
@@ -69,7 +67,6 @@ pub fn describe(err: Errors) []const u8 {
         Errors.EXP_VALUE_AFTER_EQL => return "Variable requires a value",
         Errors.NO_MUT_GL_VARS => return "Global variables cannot be mutable",
         Errors.NOT_ALLOWED_AT_GLOBAL => return "Found global token at its forbidden scope",
-
         else => return "TODO err msg",
     }
 }
