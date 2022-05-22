@@ -1,5 +1,4 @@
 BIN ?= ./zig-out/bin/rotate
-EXPORT_FILES = *.c *.h
 
 run: fmt
 	@zig build run
@@ -17,8 +16,4 @@ fmt:
 	@zig fmt .
 
 clean:
-	@rm -rf ./zig-out/ ./zig-cache/ *.md callgrind.out* $(EXPORT_FILES)
-
-analyze:
-	@valgrind --tool=callgrind $(BIN)
-	@kcachegrind
+	@rm -rf ./zig-out/ ./zig-cache/

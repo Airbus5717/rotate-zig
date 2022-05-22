@@ -1,43 +1,14 @@
 const std = @import("std");
+const print = std.debug.print;
+const Lexer = @import("./frontend/Lexer.zig");
+const Token_Type = Lexer.Token_Type;
+const reader = @import("file.zig");
 
-const lexer = @import("lexer/lexer.zig");
-const output = @import("log.zig");
-const config = @import("config.zig");
+pub fn main() !void {
+    var allocator = std.heap.raw_c_allocator;
+    _ = allocator;
 
-pub var log_file: std.fs.File = undefined;
-
-pub fn main() void {
-    const filename = "main.vr";
-    const outputfile = "main.c";
-    compile(filename, outputfile) catch |err| {
-        output.logErr(@errorName(err));
-    };
-}
-
-pub fn compile(filename: []const u8, outputfile: []const u8) !void {
-    // log file
-    log_file = undefined; // try std.fs.cwd().createFile(
-    //     config.log_output,
-    //     .{ .read = true },
-    // );
-    // defer log_file.close();
-
-    // lexer
-    var lex = lexer.initLexer(filename, log_file) catch |err| {
-        output.logErr(@errorName(err));
-        return;
-    };
-    defer lex.freeLexer();
-
-    lex.lex() catch |err| {
-        output.printLog(err, &lex);
-        return;
-    };
-    // lex.outputTokens();
-    if (!lex.done) {
-        output.logErr("lexer failure");
-        return;
-    }
-
-    _ = outputfile;
+    const file = try reader.readFile("main.vr", &allocator);
+    var lexer = Lexer.init(file, allocator);
+    try lexer.lex();
 }

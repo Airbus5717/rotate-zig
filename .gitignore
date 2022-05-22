@@ -1,5 +1,3 @@
 zig-out/
 zig-cache/
-*.md
 *.vr
-*.c
