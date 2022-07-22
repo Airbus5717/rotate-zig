@@ -15,5 +15,7 @@ test: fmt
 fmt:
 	@zig fmt .
 
+format: fmt
+
 clean:
 	@rm -rf ./zig-out/ ./zig-cache/

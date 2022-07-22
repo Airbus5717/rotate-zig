@@ -1,19 +1,25 @@
 const std = @import("std");
 const print = std.debug.print;
+
 const Lexer = @import("./frontend/Lexer.zig");
 const Token_Type = Lexer.Token_Type;
-const reader = @import("file.zig");
+const readFile = @import("file.zig").readFile;
 
-pub fn compile() !void {
+pub fn compile(name: []const u8) !void {
     var allocator = std.heap.raw_c_allocator;
 
-    const file = try reader.readFile("main.vr", &allocator);
-    var lexer = Lexer.init(file, allocator);
+    var lexer: Lexer = try Lexer.init(name, allocator);
+    defer lexer.deinit();
     try lexer.lex();
 }
 
 pub fn main() void {
-    compile() catch |err| {
+    const file_name = "main.vr";
+    compile(file_name) catch |err| {
         std.log.err("{s}", .{@errorName(err)});
     };
+}
+
+test {
+    _ = @import("file.zig");
 }
