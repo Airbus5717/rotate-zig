@@ -3,10 +3,16 @@ const os = std.os;
 const max_32bit = std.math.maxInt(u32);
 const Lexer = @import("./frontend/Lexer.zig").Lexer;
 
-pub fn readFile(name: []const u8, allocator: std.mem.Allocator) !Lexer {
+pub fn readFile(
+    name: []const u8,
+    allocator: std.mem.Allocator,
+) !Lexer {
     var path_buffer: [std.fs.MAX_PATH_BYTES]u8 = undefined;
     const abs_path = try std.fs.realpath(name, &path_buffer);
-    var file = try std.fs.openFileAbsolute(abs_path, .{ .read = true });
+    var file = try std.fs.openFileAbsolute(
+        abs_path,
+        .{ .read = true },
+    );
     defer file.close();
 
     const file_size = try file.getEndPos();

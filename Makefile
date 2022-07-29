@@ -1,13 +1,13 @@
 BIN ?= ./zig-out/bin/rotate
 
+build: fmt
+	@zig build 
+
 run: fmt
 	@zig build run
 
 fast: fmt
 	@zig build -Drelease-fast=true run
-
-build: fmt
-	@zig build -Drelease-fast=true
 
 test: fmt
 	@zig build test

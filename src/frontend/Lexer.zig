@@ -1,7 +1,12 @@
 const std = @import("std");
 const print = std.debug.print;
 const isDigit = std.ascii.isDigit;
+const eql = std.mem.eql;
 const ArrayList = std.ArrayList;
+
+const LexerErrors = error{
+    EOF,
+};
 
 const isAlphaNum_ = @import("../common.zig").isID;
 const file_io = @import("../file.zig");
@@ -23,7 +28,10 @@ index: u32 = undefined,
 line: u32 = undefined,
 len: u32 = undefined,
 
-pub fn init(file_name: []const u8, allocator: std.mem.Allocator) !Lexer {
+pub fn init(
+    file_name: []const u8,
+    allocator: std.mem.Allocator,
+) !Lexer {
     // allocator, file_name, length and contents are put in using readfile;
     var s: Lexer = try file_io.readFile(file_name, allocator);
     s.tokens = ArrayList(Token).init(allocator);
@@ -92,13 +100,13 @@ pub fn lex(self: *Lexer) !void {
                 if (p == '=') {
                     self.advanceLength();
                     try self.addToken(.AddEqual);
-                } else try self.addToken(.PLUS);
+                } else try self.addToken(.Plus);
             },
             '-' => {
                 if (p == '=') {
                     self.advanceLength();
                     try self.addToken(.SubEqual);
-                } else try self.addToken(.MINUS);
+                } else try self.addToken(.Minus);
             },
             '*' => {
                 if (p == '=') {
@@ -112,7 +120,9 @@ pub fn lex(self: *Lexer) !void {
                     try self.addToken(.DivEqual);
                 } else if (p == '/') {
                     // SINGLE LINE COMMENTS
-                    while (self.isNotEOF() and self.current() != '\n') {
+                    while (self.isNotEOF() and
+                        self.current() != '\n')
+                    {
                         self.advance();
                     }
                 } else if (p == '*') {
@@ -120,14 +130,16 @@ pub fn lex(self: *Lexer) !void {
                     self.advance();
                     var end_of_comment: bool = false;
                     while (self.isNotEOF() and !end_of_comment) {
-                        if (self.past() == '*' and self.current() == '/') {
+                        if (self.past() == '*' and
+                            self.current() == '/')
+                        {
                             self.advance();
                             end_of_comment = true;
                         }
                         self.advance();
                     }
                 } else {
-                    try self.addToken(.DIV);
+                    try self.addToken(.Div);
                 }
             },
             '!' => {
@@ -153,9 +165,85 @@ fn lexIdentifiers(self: *Lexer) !void {
     while (isAlphaNum_(self.current())) {
         self.advanceLength();
     }
-    var _type = .Identifier;
+    var _type: Token_Type = .Identifier;
+    const word = self.slice(self.len);
+    switch (self.len) {
+        2 => {
+            if (eql(u8, "if", word)) {
+                _type = .If;
+            } else if (eql(u8, "fn", word)) {
+                _type = .Function;
+            } else if (eql(u8, "or", word)) {
+                _type = .Or;
+            } else if (eql(u8, "u8", word)) {
+                _type = .INT_U8;
+            } else if (eql(u8, "i8", word)) {
+                _type = .INT_S8;
+            }
+        },
+        3 => {
+            if (eql(u8, "for", word)) {
+                _type = .For;
+            } else if (eql(u8, "let", word)) {
+                _type = .Let;
+            } else if (eql(u8, "pub", word)) {
+                _type = .Public;
+            } else if (eql(u8, "str", word)) {
+                _type = .StringKeyword;
+            } else if (eql(u8, "var", word)) {
+                _type = .Var;
+            } else if (eql(u8, "int", word)) {
+                _type = .IntKeyword;
+            } else if (eql(u8, "ref", word)) {
+                _type = .Ref;
+            } else if (eql(u8, "and", word)) {
+                _type = .And;
+            } else if (eql(u8, "u16", word)) {
+                _type = .INT_U16;
+            } else if (eql(u8, "i16", word)) {
+                _type = .INT_S16;
+            }
+        },
+        4 => {
+            if (eql(u8, "else", word)) {
+                _type = .Else;
+            } else if (eql(u8, "true", word)) {
+                _type = .True;
+            } else if (eql(u8, "char", word)) {
+                _type = .CharKeyword;
+            } else if (eql(u8, "bool", word)) {
+                _type = .BoolKeyword;
+            } else if (eql(u8, "void", word)) {
+                _type = .Void;
+            }
+        },
+        5 => {
+            if (eql(u8, "while", word)) {
+                _type = .While;
+            } else if (eql(u8, "false", word)) {
+                _type = .False;
+            } else if (eql(u8, "match", word)) {
+                _type = .Match;
+            } else if (eql(u8, "break", word)) {
+                _type = .Break;
+            } else if (eql(u8, "float", word)) {
+                _type = .FloatKeyword;
+            } else if (eql(u8, "defer", word)) {
+                _type = .Defer;
+            }
+        },
+        6 => {
+            if (eql(u8, "return", word)) {
+                _type = .Return;
+            } else if (eql(u8, "import", word)) {
+                _type = .Import;
+            } else if (eql(u8, "struct", word)) {
+                _type = .Struct;
+            }
+        },
 
-    switch (self.len) {}
+        else => {},
+    }
 
     try self.addToken(_type);
 }
@@ -178,11 +266,19 @@ fn lexNumbers(self: *Lexer) !void {
 }
 
 fn lexStrings(self: *Lexer) !void {
-    _ = self;
+    self.advanceLength();
+    while (self.current() != '"' and self.past() != '\\') {
+        self.advanceLength();
+        if (!self.isNotEOF()) {
+            return LexerErrors.EOF;
+        }
+    }
+    self.advanceLength();
+    try self.addToken(.String);
 }
 
 fn lexChars(self: *Lexer) !void {
-    self.advance();
+    self.advanceLength();
 }
 
 fn lexBuiltins(self: *Lexer) !void {
@@ -209,6 +305,10 @@ fn past(self: *Lexer) u8 {
 
 fn peek(self: *Lexer) u8 {
     return self.contents[self.index + 1];
+}
+
+fn slice(self: *Lexer, len: usize) []const u8 {
+    return self.contents[self.index..(self.index + len)];
 }
 
 fn isNotEOF(self: *Lexer) bool {
@@ -257,10 +357,10 @@ pub const Token_Type = enum(u8) {
     SemiColon, // ;
     Colon, // :
     Function, // 'fn'
-    PLUS, // +
-    MINUS, // -
+    Plus, // +
+    Minus, // -
     Star, // *
-    DIV, // /
+    Div, // /
     LeftParen, // (
     RightParen, // )
     LeftCurly, // {
@@ -297,8 +397,8 @@ pub const Token_Type = enum(u8) {
     Struct, // 'struct'
     Ref, // 'ref'
     Void, // 'void'
-    Include, // 'include'
     Nil, // `nil` basically null
+    Defer, // 'defer'
     EOT, // EOT - END OF TOKENS
 
     pub fn toString(tag: Token_Type) []const u8 {
